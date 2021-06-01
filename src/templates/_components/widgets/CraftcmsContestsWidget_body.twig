@@ -1,0 +1,20 @@
+{# @var craft \craft\web\twig\variables\CraftVariable #}
+{#
+/**
+ * CraftCMS Contests plugin for Craft CMS
+ *
+ * CraftcmsContestsWidget Widget Body
+ *
+ * @author    The Refinery
+ * @copyright Copyright (c) 2021 The Refinery
+ * @link      https://the-refinery.io
+ * @package   CraftcmsContests
+ * @since     1.0.0
+ */
+#}
+
+{% set iconUrl = view.getAssetManager().getPublishedUrl('@therefinery/craftcmscontests/assetbundles/craftcmscontestswidgetwidget/dist', true) ~ '/img/CraftcmsContestsWidget-icon.svg' %}
+
+<img src="{{ iconUrl }}" height="64" width="64" />
+
+<p>{{ message }}</p>

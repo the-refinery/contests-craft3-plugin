@@ -1,0 +1,44 @@
+{
+    "name": "therefinery/craft-cms-contests",
+    "description": "This is a plugin that allows you to run contests with voting in your CraftCMS site",
+    "type": "craft-plugin",
+    "version": "1.0.0",
+    "keywords": [
+        "craft",
+        "cms",
+        "craftcms",
+        "craft-plugin",
+        "craftcms contests"
+    ],
+    "support": {
+        "docs": "https://github.com/https://github.com/the-refinery/contests-craft3-plugin/craft-cms-contests/blob/master/README.md",
+        "issues": "https://github.com/https://github.com/the-refinery/contests-craft3-plugin/craft-cms-contests/issues"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "The Refinery",
+            "homepage": "https://the-refinery.io"
+        }
+    ],
+    "require": {
+        "craftcms/cms": "^3.0.0"
+    },
+    "autoload": {
+        "psr-4": {
+          "therefinery\\craftcmscontests\\": "src/"
+        }
+    },
+    "extra": {
+        "name": "CraftCMS Contests",
+        "handle": "craft-cms-contests",
+        "developer": "The Refinery",
+        "developerUrl": "https://the-refinery.io",
+        "documentationUrl": "https://github.com/https://github.com/the-refinery/contests-craft3-plugin/craft-cms-contests/blob/master/README.md",
+        "changelogUrl": "https://raw.githubusercontent.com/https://github.com/the-refinery/contests-craft3-plugin/craft-cms-contests/master/CHANGELOG.md",
+        "components": {
+            "craftcmsContestsService": "therefinery\\craftcmscontests\\services\\CraftcmsContestsService"
+        },
+        "class": "therefinery\\craftcmscontests\\CraftcmsContests"
+    }
+}
