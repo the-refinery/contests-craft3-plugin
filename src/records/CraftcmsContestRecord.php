@@ -20,7 +20,7 @@ use craft\db\ActiveRecord;
  * @package   CraftcmsContests
  * @since     1.0.0
  */
-class CraftcmsContestsRecord extends ActiveRecord
+class CraftcmsContestRecord extends ActiveRecord
 {
     // Public Static Methods
     // =========================================================================
@@ -30,6 +30,6 @@ class CraftcmsContestsRecord extends ActiveRecord
      */
     public static function tableName()
     {
-        return '{{%craftcmscontests_craftcmscontestsrecord}}';
+        return '{{%craftcms_contests}}';
     }
 }
