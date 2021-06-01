@@ -20,7 +20,7 @@ use craft\base\Model;
  * @package   CraftcmsContests
  * @since     1.0.0
  */
-class CraftcmsContestsModel extends Model
+class CraftcmsContestModel extends Model
 {
     // Public Properties
     // =========================================================================
@@ -28,7 +28,17 @@ class CraftcmsContestsModel extends Model
     /**
      * @var string
      */
-    public $someAttribute = 'Some Default';
+    public $id;
+    public $dateCreated;
+    public $dateUpdated;
+    public $uid;
+    public $contestId;
+    public $categoryId;
+    public $entryId;
+    public $email;
+    public $ip;
+    public $extraData;
+    public $userAgent;
 
     // Public Methods
     // =========================================================================
@@ -38,9 +48,9 @@ class CraftcmsContestsModel extends Model
      */
     public function rules()
     {
-        return [
-            ['someAttribute', 'string'],
-            ['someAttribute', 'default', 'value' => 'Some Default'],
-        ];
+        // return [
+        //     ['someAttribute', 'string'],
+        //     ['someAttribute', 'default', 'value' => 'Some Default'],
+        // ];
     }
 }
