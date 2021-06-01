@@ -89,7 +89,8 @@ class CraftcmsContests extends Plugin
             UrlManager::class,
             UrlManager::EVENT_REGISTER_SITE_URL_RULES,
             function (RegisterUrlRulesEvent $event) {
-                $event->rules['siteActionTrigger1'] = 'craft-cms-contests/default';
+                $event->rules['contestify/votes/saveVoteAsync'] = 'craft-cms-contests/votes/save-vote-async';
+                $event->rules['contestify/votes/saveVote'] = 'craft-cms-contests/votes/save-vote';
             }
         );
 
