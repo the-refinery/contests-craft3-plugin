@@ -1,0 +1,58 @@
+{% extends "_layouts/cp" %}
+{% import "_includes/forms" as forms %}
+
+{% set bodyClass = 'contestify' %}
+
+{% set title = 'Contestify' %}
+{% set page = 'Votes' %}
+
+{% set crumbs = [
+    { label: "Contestify"|t, url: url('contestify') },
+    { label: "Contests"|t, url: url('contestify/contests') },
+] %}
+
+{% set contestifySections = {
+    contests: { label: "Contests"|t, url: url('contestify/contests') },
+    votes:    { label: "Votes"|t, url: url('contestify/votes') },
+} %}
+
+{% if craft.app.version < 2.5 %}
+    {% set tabs = contestifySections %}
+    {% set selectedTab = 'votes' %}
+{% else %}
+    {% set subnav = contestifySections %}
+    {% set selectedSubnavItem = 'votes' %}
+{% endif %}
+
+{% set content %}
+    <h1>{{ page|t }}</h1>
+    <h2>Click on a contest below to view vote information</h2>
+
+    {% if contestItems|length %}
+    <table id="forms" class="data fullwidth collapsible">
+        <thead>
+        <th scope="col">{{ "Contest Name"|t }}</th>
+        <th scope="col">{{ "Contest Handle"|t }}</th>
+        </thead>
+        <tbody>
+            {% for contest in contestItems %}
+            <tr data-id="{{ contest.id }}" data-name="{{contest.name}}">
+                <th scope="row" data-title="{{ 'Name'|t }}">
+                    <a href="{{ url('craft-cms-contests/votes-by-contest/' ~ contest.id) }}">
+                        {{ contest.name }}
+                    </a>
+                </th>
+                <td data-title="{{ 'Handle'|t }}">
+                    <code>
+                        {{ contest.handle }}
+                    </code>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <h2>No contest founds.</h2>
+    {% endif %}
+{% endset %}
+

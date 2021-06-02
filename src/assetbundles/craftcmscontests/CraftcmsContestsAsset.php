@@ -37,6 +37,7 @@ class CraftcmsContestsAsset extends AssetBundle
 
         $this->js = [
             'js/CraftcmsContests.js',
+            'js/chart.min.js',
         ];
 
         $this->css = [

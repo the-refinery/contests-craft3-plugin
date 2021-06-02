@@ -1,0 +1,108 @@
+{% extends "_layouts/cp" %}
+{% import "_includes/forms" as forms %}
+
+{% set bodyClass = 'contestify' %}
+
+{% set title = 'Contestify' %}
+{% set page = 'Votes For Contest: ' ~ contest.name %}
+
+{% set crumbs = [
+    { label: "Contestify"|t, url: url('contestify') },
+    { label: "Votes"|t, url: url('contestify/votes') },
+    { label: contest.name, url: url('contestify/votes-by-contest/'~ contest.id) },
+] %}
+
+{% set contestifySections = {
+    contests: { label: "Contests"|t, url: url('contestify/contests') },
+    votes:    { label: "Votes"|t, url: url('contestify/votes') },
+} %}
+
+{% if craft.app.version < 2.5 %}
+    {% set tabs = contestifySections %}
+    {% set selectedTab = 'votes' %}
+{% else %}
+    {% set subnav = contestifySections %}
+    {% set selectedSubnavItem = 'votes' %}
+{% endif %}
+
+{% set content %}
+    <h1>{{ page|t }}</h1>
+
+    {% if contest %}
+        <h2>Total Votes: {{ totalVotes | number_format}}</h2>
+
+        <div class="vote-count-list-container">
+        {% for voteCountTuple in voteCountsWithEntries %}
+            <div class="vote-count-list-row">
+                <div class="vote-count-list-title">{{ voteCountTuple[1].title }}</div>
+                <div class="vote-count-list-counts">{{ voteCountTuple[0] | number_format }} votes</div>
+            </div>
+        {% endfor %}
+        </div>
+
+        <div id="votes-chart-container" style="position: relative; width: 600px;">
+            <canvas id="votes-chart"></canvas>
+        </div>
+    {% else %}
+        <h2>Request contest not found.</h2>
+    {% endif %}
+{% endset %}
+
+{% if contest %}
+{% set js %}
+    $(function() {
+        $("#votes-chart-container").height(50*{{ voteChartData["data"] | length }});
+        var ctx = document.getElementById('votes-chart');
+		var color = Chart.helpers.color;
+		var horizontalBarChartData = {
+			labels: {{ voteChartData["labels"]|json_encode|raw }},
+			datasets: [{
+				label: 'Votes',
+				borderWidth: 1,
+				data: {{ voteChartData["data"]|json_encode|raw }}
+			}]
+		};
+
+        var myChart = new Chart(ctx, {
+            type: 'horizontalBar',
+            data: horizontalBarChartData,
+            options: {
+                // Elements options apply to all of the options unless overridden in a dataset
+                // In this case, we are setting the border of each horizontal bar to be 2px wide
+                elements: {
+                    rectangle: {
+                        borderWidth: 2,
+                    }
+                },
+                responsive: true,
+                maintainAspectRatio: false,
+                legend: {
+                    display: false,
+                },
+                title: {
+                    display: true,
+                    text: 'Votes by Entry'
+                },
+                scales: {
+                    yAxes: [{
+                        //barPercentage: 0.8,
+                        //categoryPercentage: 0.8,
+                        //barThickness: 40,
+                        //maxBarThickness: 40,
+                        minBarLength: 2,
+                        gridLines: {
+                            offsetGridLines: true
+                        },
+                    }],
+                    xAxes: [{
+                        ticks: {
+                            beginAtZero: true
+                        }
+                    }]
+                }
+            }
+        });
+    });
+{% endset %}
+{% includeJs js %}
+{% endif %}

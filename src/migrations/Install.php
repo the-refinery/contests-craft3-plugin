@@ -128,8 +128,8 @@ class Install extends Migration
         $this->createIndex(null, '{{%craftcms_contests}}', ['name'], true);
         $this->createIndex(null, '{{%craftcms_contests}}', ['handle'], true);
 
-        $this->createIndex(null, '{{%craftcms_contests_votes}}', ['email'], true);
-        $this->createIndex(null, '{{%craftcms_contests_votes}}', ['email', 'categoryId'], true);
+        $this->createIndex(null, '{{%craftcms_contests_votes}}', ['email'], false);
+        $this->createIndex(null, '{{%craftcms_contests_votes}}', ['email', 'categoryId'], false);
     }
 
     /**
@@ -152,8 +152,8 @@ class Install extends Migration
      */
     protected function removeTables()
     {
-        $this->dropTableIfExists('{{%craftcms_contests}}');
         $this->dropTableIfExists('{{%craftcms_contests_votes}}');
+        $this->dropTableIfExists('{{%craftcms_contests}}');
     }
 }
 

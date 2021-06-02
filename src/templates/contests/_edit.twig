@@ -1,0 +1,159 @@
+{% extends "_layouts/cp" %}
+{% import "_includes/forms" as forms %}
+
+{% set bodyClass = 'contestify contestify-new-contest' %}
+{% set pageSlug = craft.request.lastSegment %}
+
+{% set title = 'Contestify' %}
+
+{% set fullPageForm = true %}
+
+{% if pageSlug == 'edit' %}
+    {% set page = 'Edit Contest' %}
+{% else %}
+    {% set page = 'New Contest' %}
+{% endif %}
+
+{% set crumbs = [
+    { label: "Contestify"|t, url: url('contestify') },
+    { label: "Contests"|t, url: url('contestify/contests') },
+    { label: contest.name, url: url('contestify/contests/'~ contest.id ~ '/edit') },
+] %}
+
+{% set contestifySections = {
+    contests: { label: "Contests"|t, url: url('contestify/contests') },
+    votes:    { label: "Votes"|t, url: url('contestify/votes') },
+} %}
+
+{% if craft.app.version < 2.5 %}
+    {% set tabs = contestifySections %}
+    {% set selectedTab = 'contests' %}
+{% else %}
+    {% set subnav = contestifySections %}
+    {% set selectedSubnavItem = 'contests' %}
+{% endif %}
+
+{% set content %}
+    <input type="hidden" name="action" value="craft-cms-contests/contests/save">
+    <input type="hidden" name="redirect" value="craft-cms-contests/contests">
+    {{ getCsrfInput() }}
+
+    <h2>{{ page|t }}</h2>
+
+    {% if contest.id %}
+        <input type="hidden" name="contestId" value="{{ contest.id }}">
+    {% endif %}
+
+    {{ forms.lightswitchField({
+        label: "Enabled?"|t,
+        name: 'enabled',
+        instructions: "Enables or disables this contest. When disabled, votes will not be accepted for this particular contest."|t,
+        on: contest.enabled,
+    }) }}
+
+
+    {{ forms.textField({
+        first: true,
+        label: "Contest Name"|t,
+        instructions: "Give this contest a name."|t,
+        id: 'name',
+        name: 'name',
+        value: contest.name,
+        errors: contest.getErrors('name'),
+        autofocus: true,
+        required: true,
+        size: 50,
+        translatable: true
+    }) }}
+
+    {{ forms.textField({
+        label: "Handle"|t,
+        instructions: "How you’ll refer to this contest in the templates."|t,
+        id: 'handle',
+        class: 'code',
+        name: 'handle',
+        value: contest.handle,
+        size: 50,
+        errors: contest.getErrors('handle'),
+        required: true
+    }) }}
+
+    {# {{ forms.elementSelectField({
+        label: "Categories"|t,
+        name: "categories",
+        id: "contestifyCategories",
+        elements: categories,
+        elementType: elementType,
+        jsClass: 'Craft.CategorySelectInput',
+        limit: 0,
+    }) }} #}
+    {{ forms.elementSelectField({
+        label: "Categories"|t,
+        name: "categories",
+        id: "contestifyCategories",
+        elements: categories,
+        elementType: 'craft\\elements\\Category',
+        limit: 0,
+    }) }}
+
+    <div class="grid" style="width: 50%">
+        <div class="item">
+            {{ forms.textField(
+                {
+                    label: 'Voting Lockout Length',
+                    instructions: 'Define how long a user will be locked out from voting multiple times, paired with Voting Lockout Frequency.',
+                    id: 'lockoutLength',
+                    name: 'lockoutLength',
+                    value: contest.lockoutLength,
+                    type: 'number',
+                })
+            }}
+        </div>
+
+        <div class="item">
+            {{ forms.selectField(
+                {
+                    label: 'Voting Lockout Frequency',
+                    instructions: 'Define how long a user will be locked out from voting multiple times, paired with Voting Lockout Length.',
+                    id: 'lockoutFrequency',
+                    name: 'lockoutFrequency',
+                    value: contest.lockoutFrequency,
+                    options: {
+                        second: 'seconds',
+                        minute: 'minutes',
+                        hour: 'hours',
+                        day: 'days',
+                        week: 'weeks',
+                        month: 'months',
+                        year: 'years',
+                    },
+                })
+            }}
+        </div>
+    </div>
+
+    {{ forms.lightswitchField({
+        label: "Session Protect?"|t,
+        name: 'sessionProtect',
+        instructions: "Enables or disables Session Protection (recommended: Enabled). When enabled, this prevents a user from casting multiple votes (even with different email addresses) within the specified time period based on the user's session and the lockout frequency."|t,
+        on: contest.sessionProtect,
+    }) }}
+
+    {{ forms.textField({
+        label: "reCaptcha Secret Key"|t,
+        instructions: "Enter the reCaptcha (v2) Secret Key for this contest. A blank secret key here means reCaptcha is disabled for this contest. If reCaptcha is desired, remember to also set up the corresponding site key on the frontend!"|t,
+        id: 'recaptchaSecret',
+        name: 'recaptchaSecret',
+        value: contest.recaptchaSecret,
+        errors: contest.getErrors('recaptchaSecret'),
+        autofocus: false,
+        required: false,
+        size: 100,
+        translatable: true
+    }) }}
+
+{% endset %}
+
+{% includejs %}
+    {% if not contest.handle %}new Craft.HandleGenerator('#name', '#handle');{% endif %}
+{% endincludejs %}

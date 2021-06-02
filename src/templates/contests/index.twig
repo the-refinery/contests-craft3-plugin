@@ -1,0 +1,104 @@
+{% extends "_layouts/cp" %}
+{% import "_includes/forms" as forms %}
+
+{% set bodyClass = 'contestify' %}
+
+{% set title = 'Contestify' %}
+{% set page = 'Contests' %}
+
+{% set crumbs = [
+    { label: "Contestify"|t, url: url('contestify') },
+    { label: "Contests"|t, url: url('contestify/contests') },
+] %}
+
+{% set contestifySections = {
+    contests: { label: "Contests"|t, url: url('contestify/contests') },
+    votes:    { label: "Votes"|t, url: url('contestify/votes') },
+} %}
+
+{% if craft.app.version < 2.5 %}
+    {% set tabs = contestifySections %}
+    {% set selectedTab = 'contests' %}
+{% else %}
+    {% set subnav = contestifySections %}
+    {% set selectedSubnavItem = 'contests' %}
+{% endif %}
+
+{# {% set extraPageHeaderHtml %}
+    <div class="buttons">
+        <a href="{{ url('contestify/contests/new') }}" class="btn submit add icon"><span>{{ "Create a Contest"|t }}</span></a>
+    </div>
+{% endset %} #}
+
+{% block actionButton %}
+    <a class="btn submit add icon" href="{{ url('craft-cms-contests/contests/new') }}">{{ 'New Contest'|t('craft-cms-contests') }}</a>
+{% endblock %}
+
+{% set content %}
+    <h2>{{ page|t }}</h2>
+
+    {% if contestItems|length %}
+        <div class="tableview">
+            {# <table class="data fullwidth" id="contests" style="table-layout: fixed; width: 100%; overflow: hidden;"> #}
+            <table class="data fullwidth" id="contests">
+            <thead>
+                    <th scope="col">{{ "Name"|t }}</th>
+                    <th scope="col">{{ "Handle"|t }}</th>
+                    <th scope="col">{{ "Categories"|t }}</th>
+                    <th scope="col">{{ "Lockout"|t }}</th>
+                    <th scope="col">{{ "Session Protect"|t }}</th>
+                    <th scope="col">{{ "Contest Status"|t }}</th>
+                    <th scope="col" class="thin" colspan="1"></th>
+            </thead>
+
+            <tbody>
+                {% for contest in contestItems %}
+                <tr data-id="{{ contest.id }}" data-name="{{ contest.name }}">
+                    <td data-title="{{ "Name"|t }}" class="name"><a href="{{ url('craft-cms-contests/contests/' ~ contest.id ~ '/edit') }}">{{ contest.name }}</a></td>
+                    <td data-title="{{ "Handle"|t }}" class="handle">
+                        {{ contest.handle }}
+                    </td>
+                    <td data-title="{{ "Categories"|t }}" class="categories">
+                        {% set categories = contest.categories ? craft.categories.id(contest.categories|json_decode) %}
+                        {% for category in categories %}
+                            {{ category.title }}
+                            {{ not loop.last ? ', ' }}
+                        {% endfor %}
+                    </td>
+                    <td data-title="{{ "Lockout"|t }}" class="lockout">
+                        {{ contest.lockoutLength }} {{ contest.lockoutFrequency }}{{ contest.lockoutLength == 1 ? '' : 's' }}
+                    </td>
+                    <td data-title="{{ "Session Protect"|t }}" class="lockout contest-index-td-{{ contest.sessionProtect == 1 ? 'enabled' : 'disabled'}}">
+                        {{ contest.sessionProtect == 1 ? "Enabled" : "Disabled" }}
+                    </td>
+                    <td data-title="{{ "Contest Status"|t }}" class="lockout contest-index-td-{{ contest.enabled == 1 ? 'enabled' : 'disabled'}}">
+                        {{ contest.enabled == 1 ? "Enabled" : "Disabled" }}
+                    </td>
+                    <td class="thin action">
+                        <a class="delete icon" title="{{ 'Delete'|t('craft-cms-contests') }}" role="button"></a>
+                    </td>
+                    {# <td class="rightalign">
+                        <a class="delete icon" title="{{ 'Delete'|t }}"></a>
+                    </td> #}
+                </tr>
+                {% endfor %}
+            </tbody>
+            </table>
+        </div>
+    {% else %}
+        No Contests
+    {% endif %}
+</section>
+
+{% endset %}
+
+{% set js %}
+    var adminTable = new Craft.AdminTable({
+        tableSelector: '#contests',
+        noObjectsSelector: '#nocontests',
+        newObjectBtnSelector: '#newcontestcontainer',
+        deleteAction: 'craft-cms-contests/contests/delete',
+        confirmDeleteMessage: '{{ "Are you sure you want to delete contest “{name}” AND all votes associated with it? This cannot be undone."|t }}'
+    });
+{% endset %}
+{% includeJs js %}

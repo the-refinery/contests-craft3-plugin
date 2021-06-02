@@ -21,19 +21,21 @@ use Craft;
  */
 class CraftcmsContestsVariable
 {
-    // Public Methods
-    // =========================================================================
-
-    /**
-     * @param null $optional
-     * @return string
-     */
-    public function exampleVariable($optional = null)
+    public function getAllVoteCountsByContestId($contestId)
     {
-        $result = "And away we go to the Twig template...";
-        if ($optional) {
-            $result = "I'm feeling optional today...";
-        }
-        return $result;
+        // TODO
+        // return craft()->contestify_votes->getAllVoteCountsByContestId($contestId);
+    }
+
+    public function getAllVoteCountByEntryIdAndContestId($entryId, $contestId)
+    {
+        // TODO
+        // return craft()->contestify_votes->getEntryVoteCount($entryId, $contestId);
+    }
+
+    public function getContestByHandle($contestHandle){
+        return \therefinery\craftcmscontests\CraftcmsContests::getInstance()
+            ->contestService
+            ->getContestByHandle($contestHandle);
     }
 }

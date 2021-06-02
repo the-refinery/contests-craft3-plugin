@@ -9,3 +9,43 @@
  * @package   CraftcmsContests
  * @since     1.0.0
  */
+
+.vote-count-list-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.vote-count-list-container > div:nth-child(odd) {
+  background-color: #f9f9f9;
+}
+
+.vote-count-list-row {
+  display: flex;
+  width: 350px;
+  padding: 5px 0;
+}
+
+.vote-count-list-title {
+  width: 50%;
+  text-align: right;
+  margin-right: 20px;
+  color: #108247;
+  font-weight: bold;
+}
+
+.vote-count-list-counts {
+  width: 50%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.contest-index-td-enabled {
+  color: green;
+  font-weight: bold;
+}
+
+.contest-index-td-disabled {
+  color: #bebebe;
+  font-style: italic;
+}

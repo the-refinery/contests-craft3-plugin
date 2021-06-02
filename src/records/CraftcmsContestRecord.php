@@ -22,12 +22,6 @@ use craft\db\ActiveRecord;
  */
 class CraftcmsContestRecord extends ActiveRecord
 {
-    // Public Static Methods
-    // =========================================================================
-
-    /**
-     * @inheritdoc
-     */
     public static function tableName()
     {
         return '{{%craftcms_contests}}';
