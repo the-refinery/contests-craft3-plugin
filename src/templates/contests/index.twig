@@ -1,3 +1,5 @@
+{% set selectedSubnavItem = 'contests' %}
+
 {% extends "_layouts/cp" %}
 {% import "_includes/forms" as forms %}
 
@@ -10,25 +12,6 @@
     { label: "Contestify"|t, url: url('contestify') },
     { label: "Contests"|t, url: url('contestify/contests') },
 ] %}
-
-{% set contestifySections = {
-    contests: { label: "Contests"|t, url: url('contestify/contests') },
-    votes:    { label: "Votes"|t, url: url('contestify/votes') },
-} %}
-
-{% if craft.app.version < 2.5 %}
-    {% set tabs = contestifySections %}
-    {% set selectedTab = 'contests' %}
-{% else %}
-    {% set subnav = contestifySections %}
-    {% set selectedSubnavItem = 'contests' %}
-{% endif %}
-
-{# {% set extraPageHeaderHtml %}
-    <div class="buttons">
-        <a href="{{ url('contestify/contests/new') }}" class="btn submit add icon"><span>{{ "Create a Contest"|t }}</span></a>
-    </div>
-{% endset %} #}
 
 {% block actionButton %}
     <a class="btn submit add icon" href="{{ url('craft-cms-contests/contests/new') }}">{{ 'New Contest'|t('craft-cms-contests') }}</a>

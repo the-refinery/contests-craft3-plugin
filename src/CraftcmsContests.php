@@ -185,8 +185,6 @@ class CraftcmsContests extends Plugin
     public function getCpNavItem()
     {
         $item = parent::getCpNavItem();
-        $item['label'] = "Contestify";
-        $item['url'] = "craft-cms-contests/contests";
         $item['subnav'] = [
             'contests' => ['label' => 'Contests', 'url' => 'craft-cms-contests/contests'],
             'votes' => ['label' => 'Votes', 'url' => 'craft-cms-contests/votes'],

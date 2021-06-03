@@ -1,3 +1,5 @@
+{% set selectedSubnavItem = 'votes' %}
+
 {% extends "_layouts/cp" %}
 {% import "_includes/forms" as forms %}
 
@@ -10,19 +12,6 @@
     { label: "Contestify"|t, url: url('contestify') },
     { label: "Contests"|t, url: url('contestify/contests') },
 ] %}
-
-{% set contestifySections = {
-    contests: { label: "Contests"|t, url: url('contestify/contests') },
-    votes:    { label: "Votes"|t, url: url('contestify/votes') },
-} %}
-
-{% if craft.app.version < 2.5 %}
-    {% set tabs = contestifySections %}
-    {% set selectedTab = 'votes' %}
-{% else %}
-    {% set subnav = contestifySections %}
-    {% set selectedSubnavItem = 'votes' %}
-{% endif %}
 
 {% set content %}
     <h1>{{ page|t }}</h1>
