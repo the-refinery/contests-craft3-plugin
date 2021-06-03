@@ -30,7 +30,7 @@ class CraftcmsContestVoteService extends Component
 {
     public function saveVote(CraftcmsContestVoteRecord $vote, CraftcmsContestRecord $contest) {
         if(!$contest) {
-            Craft::error("ERROR: Incoming vote with contestId='{$vote->contestId}': Contest not found. ", "contestify");
+            Craft::error("ERROR: Incoming vote with contestId='{$vote->contestId}': Contest not found. ", "craft-cms-contests");
             return array(
                 'success' => false,
                 'message' => "Contest not found."
@@ -45,7 +45,7 @@ class CraftcmsContestVoteService extends Component
         }
 
         if(!$contest->categories) {
-            Craft::error("ERROR: Incoming vote with contestId='{$contest->id}', contestName='{$contest->name}': Contest does not have any categories.", "contestify");
+            Craft::error("ERROR: Incoming vote with contestId='{$contest->id}', contestName='{$contest->name}': Contest does not have any categories.", "craft-cms-contests");
             return array(
                 'success' => false,
                 'message' => "Contest '{$contest->name}' does not have any categories.",
@@ -53,7 +53,7 @@ class CraftcmsContestVoteService extends Component
         }
 
         if(!in_array($vote->categoryId, json_decode($contest->categories, true))) {
-            Craft::error("ERROR: Incoming vote with contestId='{$contest->id}', contestName='{$contest->name}': Contest is not associated with category '{$vote->categoryId}'.", "contestify");
+            Craft::error("ERROR: Incoming vote with contestId='{$contest->id}', contestName='{$contest->name}': Contest is not associated with category '{$vote->categoryId}'.", "craft-cms-contests");
             return array(
                 'success' => false,
                 'message' => "Invalid category for contest.",
@@ -61,7 +61,7 @@ class CraftcmsContestVoteService extends Component
         }
 
         if(!$vote->email) {
-            Craft::error("ERROR: Email address not supplied with incoming vote.", "contestify");
+            Craft::error("ERROR: Email address not supplied with incoming vote.", "craft-cms-contests");
             return array(
                 'success' => false,
                 'message' => "Email address required.",
@@ -75,7 +75,7 @@ class CraftcmsContestVoteService extends Component
         if($contest->sessionProtect) {
             $sessionContestVoteTimestamp = strtotime(Craft::$app
                 ->getSession()
-                ->get("contestify:voteSessionProtectionTimestamp:{$vote->categoryId}"));
+                ->get("craft-cms-contests:voteSessionProtectionTimestamp:{$vote->categoryId}"));
 
             if($sessionContestVoteTimestamp) {
                 $epochNow = strtotime("now");
@@ -125,7 +125,7 @@ class CraftcmsContestVoteService extends Component
         if( $vote->save() ) {
             Craft::$app
                 ->getSession()
-                ->set("contestify:voteSessionProtectionTimestamp:{$vote->categoryId}", $vote->dateCreated);
+                ->set("craft-cms-contests:voteSessionProtectionTimestamp:{$vote->categoryId}", $vote->dateCreated);
 
             return array(
                 'success' => true,
@@ -140,28 +140,28 @@ class CraftcmsContestVoteService extends Component
         );
     }
 
-    public function getEntryVoteCount($entryId, $contestId) {
-        $queryResult = craft()->db->createCommand()
-            ->select('count(entryId) as entryCount')
-            ->from('contestify_votes')
-            ->where(
-                array(
-                    "contestId" => $contestId,
-                    "entryId" => $entryId
-                )
-            )
-            ->group("entryId")
-            ->queryAll();
+    // public function getEntryVoteCount($entryId, $contestId) {
+    //     $queryResult = craft()->db->createCommand()
+    //         ->select('count(entryId) as entryCount')
+    //         ->from('contestify_votes')
+    //         ->where(
+    //             array(
+    //                 "contestId" => $contestId,
+    //                 "entryId" => $entryId
+    //             )
+    //         )
+    //         ->group("entryId")
+    //         ->queryAll();
 
-        if (count($queryResult) == 0)
-        {
-            return 0;
-        }
-        else
-        {
-            return $queryResult[0]["entryCount"];
-        }
-    }
+    //     if (count($queryResult) == 0)
+    //     {
+    //         return 0;
+    //     }
+    //     else
+    //     {
+    //         return $queryResult[0]["entryCount"];
+    //     }
+    // }
 
     public function getAllVoteCountsByContestId($contestId) {
         $queryResult = CraftcmsContestVoteRecord::find()

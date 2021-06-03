@@ -3,14 +3,14 @@
 {% extends "_layouts/cp" %}
 {% import "_includes/forms" as forms %}
 
-{% set bodyClass = 'contestify' %}
+{% set bodyClass = 'craft-cms-contests' %}
 
-{% set title = 'Contestify' %}
+{% set title = 'CraftCMS Contests' %}
 {% set page = 'Contests' %}
 
 {% set crumbs = [
-    { label: "Contestify"|t, url: url('contestify') },
-    { label: "Contests"|t, url: url('contestify/contests') },
+    { label: "CraftCMS Contests"|t, url: url('craft-cms-contests') },
+    { label: "Contests"|t, url: url('craft-cms-contests/contests') },
 ] %}
 
 {% block actionButton %}
@@ -22,7 +22,6 @@
 
     {% if contestItems|length %}
         <div class="tableview">
-            {# <table class="data fullwidth" id="contests" style="table-layout: fixed; width: 100%; overflow: hidden;"> #}
             <table class="data fullwidth" id="contests">
             <thead>
                     <th scope="col">{{ "Name"|t }}</th>
@@ -60,9 +59,6 @@
                     <td class="thin action">
                         <a class="delete icon" title="{{ 'Delete'|t('craft-cms-contests') }}" role="button"></a>
                     </td>
-                    {# <td class="rightalign">
-                        <a class="delete icon" title="{{ 'Delete'|t }}"></a>
-                    </td> #}
                 </tr>
                 {% endfor %}
             </tbody>

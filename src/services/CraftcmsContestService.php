@@ -124,7 +124,7 @@ class CraftcmsContestService extends Component
         $contestCategoryIds = json_decode($contest->categories);
 
         if($contestCategoryIds === NULL) {
-            Craft::warning("WARNING: Contest (ID={$contestId}) does not have any categories.", "contestify");
+            Craft::warning("WARNING: Contest (ID={$contestId}) does not have any categories.", "craft-cms-contests");
             return [];
         }
 

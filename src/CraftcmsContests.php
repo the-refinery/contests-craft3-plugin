@@ -63,7 +63,7 @@ class CraftcmsContests extends Plugin
     /**
      * @var bool
      */
-    public $hasCpSettings = true;
+    public $hasCpSettings = false;
 
     /**
      * @var bool
@@ -95,8 +95,8 @@ class CraftcmsContests extends Plugin
             UrlManager::class,
             UrlManager::EVENT_REGISTER_SITE_URL_RULES,
             function (RegisterUrlRulesEvent $event) {
-                $event->rules['contestify/votes/saveVoteAsync'] = 'craft-cms-contests/votes/save-vote-async';
-                $event->rules['contestify/votes/saveVote'] = 'craft-cms-contests/votes/save-vote';
+                $event->rules['craft-cms-contests/votes/saveVoteAsync'] = 'craft-cms-contests/votes/save-vote-async';
+                $event->rules['craft-cms-contests/votes/saveVote'] = 'craft-cms-contests/votes/save-vote';
             }
         );
 

@@ -1,37 +1,26 @@
 {% extends "_layouts/cp" %}
 {% import "_includes/forms" as forms %}
 
-{% set bodyClass = 'contestify contestify-new-contest' %}
+{% set bodyClass = 'craft-cms-contets craft-cms-contests-new-contest' %}
 {% set pageSlug = craft.request.lastSegment %}
 
-{% set title = 'Contestify' %}
+{% set title = 'CraftCMS Contests' %}
 
 {% set fullPageForm = true %}
 
 {% if pageSlug == 'edit' %}
     {% set page = 'Edit Contest' %}
+    {% set pageCrumb = 'Edit Contest: ' ~ contest.name %}
 {% else %}
     {% set page = 'New Contest' %}
+    {% set pageCrumb = 'New Contest' %}
 {% endif %}
 
 {% set crumbs = [
-    { label: "Contestify"|t, url: url('contestify') },
-    { label: "Contests"|t, url: url('contestify/contests') },
-    { label: contest.name, url: url('contestify/contests/'~ contest.id ~ '/edit') },
+    { label: "CraftCMS Contests"|t, url: url('craft-cms-contests') },
+    { label: "Contests"|t, url: url('craft-cms-contests/contests') },
+    { label: pageCrumb, url: url('craft-cms-contests/contests/'~ contest.id ~ '/edit') },
 ] %}
-
-{% set contestifySections = {
-    contests: { label: "Contests"|t, url: url('contestify/contests') },
-    votes:    { label: "Votes"|t, url: url('contestify/votes') },
-} %}
-
-{% if craft.app.version < 2.5 %}
-    {% set tabs = contestifySections %}
-    {% set selectedTab = 'contests' %}
-{% else %}
-    {% set subnav = contestifySections %}
-    {% set selectedSubnavItem = 'contests' %}
-{% endif %}
 
 {% set content %}
     <input type="hidden" name="action" value="craft-cms-contests/contests/save">
@@ -78,19 +67,10 @@
         required: true
     }) }}
 
-    {# {{ forms.elementSelectField({
-        label: "Categories"|t,
-        name: "categories",
-        id: "contestifyCategories",
-        elements: categories,
-        elementType: elementType,
-        jsClass: 'Craft.CategorySelectInput',
-        limit: 0,
-    }) }} #}
     {{ forms.elementSelectField({
         label: "Categories"|t,
         name: "categories",
-        id: "contestifyCategories",
+        id: "craftcmsContestCategories",
         elements: categories,
         elementType: 'craft\\elements\\Category',
         limit: 0,

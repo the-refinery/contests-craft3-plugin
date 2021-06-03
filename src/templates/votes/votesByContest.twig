@@ -1,29 +1,16 @@
 {% extends "_layouts/cp" %}
 {% import "_includes/forms" as forms %}
 
-{% set bodyClass = 'contestify' %}
+{% set bodyClass = 'craft-cms-contests' %}
 
-{% set title = 'Contestify' %}
+{% set title = 'CraftCMS Contests' %}
 {% set page = 'Votes For Contest: ' ~ contest.name %}
 
 {% set crumbs = [
-    { label: "Contestify"|t, url: url('contestify') },
-    { label: "Votes"|t, url: url('contestify/votes') },
-    { label: contest.name, url: url('contestify/votes-by-contest/'~ contest.id) },
+    { label: "CraftCMS Contests"|t, url: url('craft-cms-contests') },
+    { label: "Votes"|t, url: url('craft-cms-contests/votes') },
+    { label: contest.name, url: url('craft-cms-contests/votes-by-contest/'~ contest.id) },
 ] %}
-
-{% set contestifySections = {
-    contests: { label: "Contests"|t, url: url('contestify/contests') },
-    votes:    { label: "Votes"|t, url: url('contestify/votes') },
-} %}
-
-{% if craft.app.version < 2.5 %}
-    {% set tabs = contestifySections %}
-    {% set selectedTab = 'votes' %}
-{% else %}
-    {% set subnav = contestifySections %}
-    {% set selectedSubnavItem = 'votes' %}
-{% endif %}
 
 {% set content %}
     <h1>{{ page|t }}</h1>

@@ -65,7 +65,7 @@ class VotesController extends Controller
 
             if ($unmaskedRequestToken !== Craft::$app->getSecurity()->unmaskToken(Craft::$app->request->csrfToken)) {
                 // If the token is supplied but is invalid, as in possibly being forged or is stale...
-                Craft::warning("ERROR: incoming async vote payload has invalid CSRF token.", "contestify");
+                Craft::warning("ERROR: incoming async vote payload has invalid CSRF token.", "craft-cms-contests");
                 return $this->asJson(
                     array(
                         "status" => "error",
@@ -79,7 +79,7 @@ class VotesController extends Controller
             }
         } else {
             // Incoming payload does not have a CSRF token. Fail.
-            Craft::warning("WARNING: incoming async vote payload does not have CSRF token.", "contestify");
+            Craft::warning("WARNING: incoming async vote payload does not have CSRF token.", "craft-cms-contests");
             return $this->asJson(
                 array(
                     "status" => "error",
@@ -97,7 +97,7 @@ class VotesController extends Controller
             ->getContestById($data["contestId"]);
 
         if(!$contest) {
-            Craft::warning("WARNING: incoming async vote payload does not have a valid contest.", "contestify");
+            Craft::warning("WARNING: incoming async vote payload does not have a valid contest.", "craft-cms-contests");
             return $this->asJson(
                 array(
                     "status" => "error",
@@ -121,7 +121,7 @@ class VotesController extends Controller
 
                 // Return an error if the response coming back from Google is not successful.
                 if(!$response->isSuccess()) {
-                    Craft::warning("WARNING: Failure reCaptcha response coming back from Google on contest id={$contest->id}. Error codes: {$errorCodes}", "contestify");
+                    Craft::warning("WARNING: Failure reCaptcha response coming back from Google on contest id={$contest->id}. Error codes: {$errorCodes}", "craft-cms-contests");
                     return $this->asJson(
                         array(
                             "status" => "error",
@@ -134,7 +134,7 @@ class VotesController extends Controller
                     )->setStatusCode(400);
                 }
             } else {// recaptcha is set up and response is not in the payload, this is an error
-                Craft::warning("WARNING: incoming vote does not have a recaptchaResponse in data, but recaptcha is enabled on contest id={$contest->id}.", "contestify");
+                Craft::warning("WARNING: incoming vote does not have a recaptchaResponse in data, but recaptcha is enabled on contest id={$contest->id}.", "craft-cms-contests");
                 return $this->asJson(
                     array(
                         "status" => "error",
