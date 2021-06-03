@@ -120,8 +120,8 @@ class CraftcmsContestService extends Component
 
     public function getAllEntriesByContestId($contestId) {
         // Get the Contest Categories
-        $category = $this->getContestById($contestId);
-        $contestCategoryIds = json_decode($category->categories);
+        $contest = $this->getContestById($contestId);
+        $contestCategoryIds = json_decode($contest->categories);
 
         if($contestCategoryIds === NULL) {
             Craft::warning("WARNING: Contest (ID={$contestId}) does not have any categories.", "contestify");

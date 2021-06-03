@@ -73,21 +73,22 @@ class CraftcmsContestVoteService extends Component
         // This is to prevent a user with a particular session from sending out many votes
         // with different email addresses.
         if($contest->sessionProtect) {
-            $sessionContestVoteTimestamp = craft()
-                ->httpSession
-                ->get("contestify:voteSessionProtectionTimestamp:{$contest->handle}");
+            $sessionContestVoteTimestamp = strtotime(Craft::$app
+                ->getSession()
+                ->get("contestify:voteSessionProtectionTimestamp:{$vote->categoryId}"));
 
             if($sessionContestVoteTimestamp) {
                 $epochNow = strtotime("now");
                 $epochCreatedPlusTimeout = strtotime(
                     "+{$contest->lockoutLength} {$contest->lockoutFrequency}",
-                    $sessionContestVoteTimestamp->getTimestamp()
+                    $sessionContestVoteTimestamp
+                    // $sessionContestVoteTimestamp->getTimestamp()
                 );
 
                 if($epochNow < $epochCreatedPlusTimeout) {
-                    $category = craft()
-                        ->categories
-                        ->getCategoryById($vote->categoryId);
+                    $category = \craft\elements\Category::find()
+                        ->id($vote->categoryId)
+                        ->one();
 
                     return array(
                         'success' => false,
@@ -110,15 +111,21 @@ class CraftcmsContestVoteService extends Component
             $lockoutFrequency = $contest->lockoutFrequency;
             $lockoutFrequency = $lockoutLength > 1 ? $lockoutFrequency . 's' : $lockoutFrequency;
 
+            $category = \craft\elements\Category::find()
+                ->id($vote->categoryId)
+                ->one();
+
             return array(
                 'success' => false,
-                'message' => "You can only vote once every {$lockoutLength} {$lockoutFrequency} for category ID='{$vote->categoryId}'. Please try again soon.",
+                'message' => "You can only vote once every {$lockoutLength} {$lockoutFrequency} for category '{$category->title}'. Please try again soon.",
             );
         }
 
         // If validation passes, save the vote, return a success message
         if( $vote->save() ) {
-            Craft::$app->getSession()->set("contestify:voteSessionProtectionTimestamp:{$contest->handle}", $vote->dateCreated);
+            Craft::$app
+                ->getSession()
+                ->set("contestify:voteSessionProtectionTimestamp:{$vote->categoryId}", $vote->dateCreated);
 
             return array(
                 'success' => true,
