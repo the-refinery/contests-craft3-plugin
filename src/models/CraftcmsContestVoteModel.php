@@ -20,7 +20,7 @@ use craft\base\Model;
  * @package   CraftcmsContests
  * @since     1.0.0
  */
-class CraftcmsContestModel extends Model
+class CraftcmsContestVoteModel extends Model
 {
     // Public Properties
     // =========================================================================
