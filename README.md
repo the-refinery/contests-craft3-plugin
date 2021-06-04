@@ -45,7 +45,17 @@ If you would like to install this plugin for development or debugging purposes:
 
 ### Non-development
 
-Coming soon.
+1.  In `composer.json` add a vcs repository in the `repositories` block:
+
+        {
+          "type": "vcs",
+          "url": "https://github.com/the-refinery/contests-craft3-plugin"
+        }
+1. In `composer.json` add the requirement within your `require` block:
+
+        "therefinery/craft-cms-contests": "^1.0"
+1. Run `composer require therefinery/craft-cms-contests`
+1. Log into the CraftCMS admin panel and install the plug like you would for any other plugin.
 
 [Back to Table of Contents &uarr;](#table-of-contents)
 
