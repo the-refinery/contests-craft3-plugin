@@ -121,6 +121,7 @@ class VotesController extends Controller
 
                 // Return an error if the response coming back from Google is not successful.
                 if(!$response->isSuccess()) {
+                    $errorCodes = print_r($response->getErrorCodes(), true);
                     Craft::warning("WARNING: Failure reCaptcha response coming back from Google on contest id={$contest->id}. Error codes: {$errorCodes}", "craft-cms-contests");
                     return $this->asJson(
                         array(
