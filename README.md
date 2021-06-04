@@ -9,6 +9,8 @@ Table of Contents
 =================
 * [Requirements](#requirements)
 * [Installation](#installation)
+  * [Development](#development)
+  * [Non-development](#non-development)
 * [CraftCMS Contests Overview](#craftcms-contests-overview)
 * [Configuring CraftCMS Contests](#configuring-craftcms-contests)
 * [Using CraftCMS Contests](#using-craftcms-contests)
@@ -21,6 +23,27 @@ Table of Contents
 This plugin requires Craft CMS 3.0.0-beta.23 or later.
 
 ## Installation
+
+### Development
+
+If you would like to install this plugin for development or debugging purposes:
+
+1. Create a subfolder in your CraftCMS project that Craft has access to. For example: `<craft-root>/plugins/therefinery/craftcmscontests`
+1. Go into that directory and clone this repo:  `git clone git@github.com:the-refinery/contests-craft3-plugin.git .` or use a forked URL if you have forked this project
+1. Make sure to `.gitignore` the `plugins/therefinery/craftcmscontests` directory (even if it's temporary) as it will already have it's own git setup and you do not want to include these files with your main Craft project's git repo.
+1. In `composer.json` add a path repository in the `repositories` block, such as:
+
+        {
+         "type": "path",
+         "url": "plugins/therefinery/craftcmscontests"
+        }
+1. In `composer.json` add the requirement within your `require` block:
+
+        "therefinery/craft-cms-contests": "^1.0"
+1. Run `composer require therefinery/craft-cms-contests`
+1. Log into the CraftCMS admin panel and install the plugin like you would for any other plugin.
+
+### Non-development
 
 Coming soon.
 
