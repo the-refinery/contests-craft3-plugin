@@ -44,6 +44,7 @@ If you would like to install this plugin for development or debugging purposes:
 1. Log into the CraftCMS admin panel and install the plugin like you would for any other plugin.
 
 ### Non-development
+Use these steps if you just want to install and use the plugin without making any modifications for maintenance.
 
 1.  In `composer.json` add a vcs repository in the `repositories` block:
 
