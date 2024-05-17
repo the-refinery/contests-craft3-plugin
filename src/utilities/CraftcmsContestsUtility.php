@@ -1,6 +1,6 @@
 <?php
 /**
- * CraftCMS Contests plugin for Craft CMS 3.x
+ * CraftCMS Contests plugin for Craft CMS 4.x
  *
  * This is a plugin that allows you to run contests with voting in your CraftCMS site
  *
@@ -33,7 +33,7 @@ class CraftcmsContestsUtility extends Utility
      */
     public static function displayName(): string
     {
-        return Craft::t('craft-cms-contests', 'CraftcmsContestsUtility');
+        return Craft::t("craft-cms-contests", "CraftcmsContestsUtility");
     }
 
     /**
@@ -41,15 +41,17 @@ class CraftcmsContestsUtility extends Utility
      */
     public static function id(): string
     {
-        return 'craftcmscontests-craftcms-contests-utility';
+        return "craftcmscontests-craftcms-contests-utility";
     }
 
     /**
      * @inheritdoc
      */
-    public static function iconPath()
+    public static function iconPath(): string
     {
-        return Craft::getAlias("@therefinery/craftcmscontests/assetbundles/craftcmscontestsutilityutility/dist/img/CraftcmsContestsUtility-icon.svg");
+        return Craft::getAlias(
+            "@therefinery/craftcmscontests/assetbundles/craftcmscontestsutilityutility/dist/img/CraftcmsContestsUtility-icon.svg",
+        );
     }
 
     /**
@@ -65,14 +67,18 @@ class CraftcmsContestsUtility extends Utility
      */
     public static function contentHtml(): string
     {
-        Craft::$app->getView()->registerAssetBundle(CraftcmsContestsUtilityUtilityAsset::class);
+        Craft::$app
+            ->getView()
+            ->registerAssetBundle(CraftcmsContestsUtilityUtilityAsset::class);
 
-        $someVar = 'Have a nice day!';
-        return Craft::$app->getView()->renderTemplate(
-            'craft-cms-contests/_components/utilities/CraftcmsContestsUtility_content',
-            [
-                'someVar' => $someVar
-            ]
-        );
+        $someVar = "Have a nice day!";
+        return Craft::$app
+            ->getView()
+            ->renderTemplate(
+                "craft-cms-contests/_components/utilities/CraftcmsContestsUtility_content",
+                [
+                    "someVar" => $someVar,
+                ],
+            );
     }
 }

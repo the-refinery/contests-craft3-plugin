@@ -2,7 +2,7 @@
 {% import "_includes/forms" as forms %}
 
 {% set bodyClass = 'craft-cms-contets craft-cms-contests-new-contest' %}
-{% set pageSlug = craft.request.lastSegment %}
+{% set pageSlug = craft.app.request.segments|last %}
 
 {% set title = 'CraftCMS Contests' %}
 
@@ -25,7 +25,7 @@
 {% set content %}
     <input type="hidden" name="action" value="craft-cms-contests/contests/save">
     <input type="hidden" name="redirect" value="craft-cms-contests/contests">
-    {{ getCsrfInput() }}
+    {{ csrfInput() }}
 
     <h2>{{ page|t }}</h2>
 
@@ -134,6 +134,6 @@
 
 {% endset %}
 
-{% includejs %}
+{% js %}
     {% if not contest.handle %}new Craft.HandleGenerator('#name', '#handle');{% endif %}
-{% endincludejs %}
+{% endjs %}

@@ -1,6 +1,6 @@
 <?php
 /**
- * CraftCMS Contests plugin for Craft CMS 3.x
+ * CraftCMS Contests plugin for Craft CMS 4.x
  *
  * This is a plugin that allows you to run contests with voting in your CraftCMS site
  *
@@ -28,7 +28,7 @@ class Settings extends Model
     /**
      * @var string
      */
-    public $someAttribute = 'Some Default';
+    public string $someAttribute = "Some Default";
 
     // Public Methods
     // =========================================================================
@@ -36,11 +36,11 @@ class Settings extends Model
     /**
      * @inheritdoc
      */
-    public function rules()
+    public function rules(): array
     {
         return [
-            ['someAttribute', 'string'],
-            ['someAttribute', 'default', 'value' => 'Some Default'],
+            ["someAttribute", "string"],
+            ["someAttribute", "default", "value" => "Some Default"],
         ];
     }
 }

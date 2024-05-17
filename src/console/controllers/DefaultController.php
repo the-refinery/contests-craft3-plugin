@@ -1,6 +1,6 @@
 <?php
 /**
- * CraftCMS Contests plugin for Craft CMS 3.x
+ * CraftCMS Contests plugin for Craft CMS 4.x
  *
  * This is a plugin that allows you to run contests with voting in your CraftCMS site
  *
@@ -33,9 +33,9 @@ class DefaultController extends Controller
      *
      * @return mixed
      */
-    public function actionIndex()
+    public function actionIndex(): mixed
     {
-        $result = 'something';
+        $result = "something";
 
         echo "Welcome to the console DefaultController actionIndex() method\n";
 
@@ -47,9 +47,9 @@ class DefaultController extends Controller
      *
      * @return mixed
      */
-    public function actionDoSomething()
+    public function actionDoSomething(): mixed
     {
-        $result = 'something';
+        $result = "something";
 
         echo "Welcome to the console DefaultController actionDoSomething() method\n";
 

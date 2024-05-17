@@ -1,6 +1,6 @@
 <?php
 /**
- * CraftCMS Contests plugin for Craft CMS 3.x
+ * CraftCMS Contests plugin for Craft CMS 4.x
  *
  * This is a plugin that allows you to run contests with voting in your CraftCMS site
  *

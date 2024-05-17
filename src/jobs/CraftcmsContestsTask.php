@@ -1,6 +1,6 @@
 <?php
 /**
- * CraftCMS Contests plugin for Craft CMS 3.x
+ * CraftCMS Contests plugin for Craft CMS 4.x
  *
  * This is a plugin that allows you to run contests with voting in your CraftCMS site
  *
@@ -28,7 +28,7 @@ class CraftcmsContestsTask extends BaseJob
     /**
      * @var string
      */
-    public $someAttribute = 'Some Default';
+    public string $someAttribute = "Some Default";
 
     // Public Methods
     // =========================================================================
@@ -36,7 +36,7 @@ class CraftcmsContestsTask extends BaseJob
     /**
      * @inheritdoc
      */
-    public function execute($queue)
+    public function execute($queue): void
     {
         // Do work here
     }
@@ -49,6 +49,6 @@ class CraftcmsContestsTask extends BaseJob
      */
     protected function defaultDescription(): string
     {
-        return Craft::t('craft-cms-contests', 'CraftcmsContestsTask');
+        return Craft::t("craft-cms-contests", "CraftcmsContestsTask");
     }
 }

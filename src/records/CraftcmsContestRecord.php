@@ -1,6 +1,6 @@
 <?php
 /**
- * CraftCMS Contests plugin for Craft CMS 3.x
+ * CraftCMS Contests plugin for Craft CMS 4.x
  *
  * This is a plugin that allows you to run contests with voting in your CraftCMS site
  *
@@ -22,7 +22,7 @@ use craft\db\ActiveRecord;
  */
 class CraftcmsContestRecord extends ActiveRecord
 {
-    public static function tableName()
+    public static function tableName(): string
     {
         return '{{%craftcms_contests}}';
     }

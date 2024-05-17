@@ -1,6 +1,6 @@
 <?php
 /**
- * CraftCMS Contests plugin for Craft CMS 3.x
+ * CraftCMS Contests plugin for Craft CMS 4.x
  *
  * This is a plugin that allows you to run contests with voting in your CraftCMS site
  *
@@ -17,6 +17,7 @@ use therefinery\craftcmscontests\models\CraftcmsContestModel;
 
 use Craft;
 use craft\web\Controller;
+use yii\web\Response;
 
 /**
  * @author    The Refinery
@@ -25,83 +26,105 @@ use craft\web\Controller;
  */
 class ContestsController extends Controller
 {
-    public function actionIndex() {
+    public function actionIndex(): Response
+    {
         $variables = [];
 
-        $contests = \therefinery\craftcmscontests\CraftcmsContests::getInstance()
-            ->contestService
-            ->getAllContests();
+        $contests = \therefinery\craftcmscontests\CraftcmsContests::getInstance()->contestService->getAllContests();
 
-        $variables['contestItems']   = $contests;
-        $variables['settings']    = [];
+        $variables["contestItems"] = $contests;
+        $variables["settings"] = [];
 
-        return $this->renderTemplate('craft-cms-contests/contests/index', $variables);
+        return $this->renderTemplate(
+            "craft-cms-contests/contests/index",
+            $variables,
+        );
     }
 
-    public function actionEdit(int $contestId = null) {
+    public function actionEdit(int $contestId = null): void
+    {
         $variables = [];
 
         // Get the contest passed in by id, or create a new one (new vs. edit)
-        if(isset($contestId)) {
-            $variables['contest'] = \therefinery\craftcmscontests\CraftcmsContests::getInstance()
-                ->contestService
-                ->getContestById($contestId);
+        if (isset($contestId)) {
+            $variables[
+                "contest"
+            ] = \therefinery\craftcmscontests\CraftcmsContests::getInstance()->contestService->getContestById(
+                $contestId,
+            );
         } else {
-            $variables['contest'] = new CraftcmsContestModel();
+            $variables["contest"] = new CraftcmsContestModel();
         }
 
-        $variables['categories'] = array();
+        $variables["categories"] = [];
 
         // Grab the categories associated with the contest so we can display them as we need.
-        if(!empty($variables['contest']['categories'])) {
-            foreach(json_decode($variables['contest']['categories']) as $categoryId) {
-                $asset = Craft::$app->getElements()->getElementById($categoryId);
-                $variables['categories'][] = $asset;
+        if (!empty($variables["contest"]["categories"])) {
+            foreach (
+                json_decode($variables["contest"]["categories"])
+                as $categoryId
+            ) {
+                $asset = Craft::$app
+                    ->getElements()
+                    ->getElementById($categoryId);
+                $variables["categories"][] = $asset;
             }
         }
 
-        $this->renderTemplate('craft-cms-contests/contests/_edit', $variables);
+        $this->renderTemplate("craft-cms-contests/contests/_edit", $variables);
     }
 
-    public function actionSave() {
+    public function actionSave(): Response
+    {
         $this->requirePostRequest();
         $contest = new CraftcmsContestRecord();
         $request = Craft::$app->getRequest();
 
-        $contest->id                           = $request->getBodyParam('contestId');
-        $contest->name                         = $request->getBodyParam('name');
-        $contest->handle                       = $request->getBodyParam('handle');
-        $contest->categories                   = $request->getBodyParam('categories');
-        $contest->lockoutLength                = $request->getBodyParam('lockoutLength');
-        $contest->lockoutFrequency             = $request->getBodyParam('lockoutFrequency');
-        $contest->enabled                      = $request->getBodyParam('enabled') == "1" ? true : false;
-        $contest->sessionProtect               = $request->getBodyParam('sessionProtect') == "1" ? true : false;
-        $contest->recaptchaSecret              = $request->getBodyParam('recaptchaSecret');
+        $contest->id = $request->getBodyParam("contestId");
+        $contest->name = $request->getBodyParam("name");
+        $contest->handle = $request->getBodyParam("handle");
+        $contest->categories = $request->getBodyParam("categories");
+        $contest->lockoutLength = $request->getBodyParam("lockoutLength");
+        $contest->lockoutFrequency = $request->getBodyParam("lockoutFrequency");
+        $contest->enabled =
+            $request->getBodyParam("enabled") == "1" ? true : false;
+        $contest->sessionProtect =
+            $request->getBodyParam("sessionProtect") == "1" ? true : false;
+        $contest->recaptchaSecret = $request->getBodyParam("recaptchaSecret");
 
-        if (\therefinery\craftcmscontests\CraftcmsContests::getInstance()->contestService->saveContest($contest)) {
-            \Craft::$app->session->setNotice(Craft::t('craft-cms-contests', 'Contest saved.'));
+        if (
+            \therefinery\craftcmscontests\CraftcmsContests::getInstance()->contestService->saveContest(
+                $contest,
+            )
+        ) {
+            \Craft::$app->session->setNotice(
+                Craft::t("craft-cms-contests", "Contest saved."),
+            );
         } else {
-            \Craft::$app->session->setNotice(Craft::t('craft-cms-contests', 'Could not save contest.'));
+            \Craft::$app->session->setNotice(
+                Craft::t("craft-cms-contests", "Could not save contest."),
+            );
         }
 
-        return $this->redirect('/admin/craft-cms-contests/contests/');
+        return $this->redirect("/admin-frogtape/craft-cms-contests/contests/");
     }
 
-    public function actionDelete($id = null) {
+    public function actionDelete($id = null): Response
+    {
         $this->requirePostRequest();
 
         $request = Craft::$app->getRequest();
 
-        $contestId = $request->getRequiredBodyParam('id');
+        $contestId = $request->getRequiredBodyParam("id");
 
-        if(isset($contestId) && !empty($contestId)) {
-            \therefinery\craftcmscontests\CraftcmsContests::getInstance()
-                ->contestService
-                ->deleteContestAndVotesById($contestId);
+        if (isset($contestId) && !empty($contestId)) {
+            \therefinery\craftcmscontests\CraftcmsContests::getInstance()->contestService->deleteContestAndVotesById(
+                $contestId,
+            );
         } else {
             throw new \Exception("Contest ID was not set in the request.");
         }
 
-        return $this->asJson(['success' => true]);
+        return $this->asJson(["success" => true]);
     }
 }

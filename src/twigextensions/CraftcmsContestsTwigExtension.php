@@ -1,6 +1,6 @@
 <?php
 /**
- * CraftCMS Contests plugin for Craft CMS 3.x
+ * CraftCMS Contests plugin for Craft CMS 4.x
  *
  * This is a plugin that allows you to run contests with voting in your CraftCMS site
  *
@@ -17,6 +17,7 @@ use Craft;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
 use Twig\TwigFunction;
+use verbb\vizy\gql\types\ArrayType;
 
 /**
  * @author    The Refinery
@@ -31,28 +32,26 @@ class CraftcmsContestsTwigExtension extends AbstractExtension
     /**
      * @inheritdoc
      */
-    public function getName()
+    public function getName(): string
     {
-        return 'CraftcmsContests';
+        return "CraftcmsContests";
     }
 
     /**
      * @inheritdoc
      */
-    public function getFilters()
+    public function getFilters(): array
     {
-        return [
-            new TwigFilter('someFilter', [$this, 'someInternalFunction']),
-        ];
+        return [new TwigFilter("someFilter", [$this, "someInternalFunction"])];
     }
 
     /**
      * @inheritdoc
      */
-    public function getFunctions()
+    public function getFunctions(): array
     {
         return [
-            new TwigFunction('someFunction', [$this, 'someInternalFunction']),
+            new TwigFunction("someFunction", [$this, "someInternalFunction"]),
         ];
     }
 
@@ -61,7 +60,7 @@ class CraftcmsContestsTwigExtension extends AbstractExtension
      *
      * @return string
      */
-    public function someInternalFunction($text = null)
+    public function someInternalFunction($text = null): string
     {
         $result = $text . " in the way";
 

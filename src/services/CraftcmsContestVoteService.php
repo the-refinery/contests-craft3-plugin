@@ -1,6 +1,6 @@
 <?php
 /**
- * CraftCMS Contests plugin for Craft CMS 3.x
+ * CraftCMS Contests plugin for Craft CMS 4.x
  *
  * This is a plugin that allows you to run contests with voting in your CraftCMS site
  *
@@ -20,6 +20,7 @@ use Craft;
 use craft\helpers\Json;
 use craft\db\Query;
 use craft\base\Component;
+use yii\db\ActiveRecord;
 
 /**
  * @author    The Refinery
@@ -28,72 +29,96 @@ use craft\base\Component;
  */
 class CraftcmsContestVoteService extends Component
 {
-    public function saveVote(CraftcmsContestVoteRecord $vote, CraftcmsContestRecord $contest) {
-        if(!$contest) {
-            Craft::error("ERROR: Incoming vote with contestId='{$vote->contestId}': Contest not found. ", "craft-cms-contests");
-            return array(
-                'success' => false,
-                'message' => "Contest not found."
+    public function saveVote(
+        CraftcmsContestVoteRecord $vote,
+        CraftcmsContestRecord $contest,
+    ): ?array {
+        if (!$contest) {
+            Craft::error(
+                "ERROR: Incoming vote with contestId='{$vote->contestId}': Contest not found. ",
+                "craft-cms-contests",
             );
+            return [
+                "success" => false,
+                "message" => "Contest not found.",
+            ];
         }
 
-        if(!$contest->enabled) {
-            return array(
-                'success' => false,
-                'message' => "Contest '{$contest->name}' is not currently active.",
-            );
+        if (!$contest->enabled) {
+            return [
+                "success" => false,
+                "message" => "Contest '{$contest->name}' is not currently active.",
+            ];
         }
 
-        if(!$contest->categories) {
-            Craft::error("ERROR: Incoming vote with contestId='{$contest->id}', contestName='{$contest->name}': Contest does not have any categories.", "craft-cms-contests");
-            return array(
-                'success' => false,
-                'message' => "Contest '{$contest->name}' does not have any categories.",
+        if (!$contest->categories) {
+            Craft::error(
+                "ERROR: Incoming vote with contestId='{$contest->id}', contestName='{$contest->name}': Contest does not have any categories.",
+                "craft-cms-contests",
             );
+            return [
+                "success" => false,
+                "message" => "Contest '{$contest->name}' does not have any categories.",
+            ];
         }
 
-        if(!in_array($vote->categoryId, json_decode($contest->categories, true))) {
-            Craft::error("ERROR: Incoming vote with contestId='{$contest->id}', contestName='{$contest->name}': Contest is not associated with category '{$vote->categoryId}'.", "craft-cms-contests");
-            return array(
-                'success' => false,
-                'message' => "Invalid category for contest.",
+        if (
+            !in_array(
+                $vote->categoryId,
+                json_decode($contest->categories, true),
+            )
+        ) {
+            Craft::error(
+                "ERROR: Incoming vote with contestId='{$contest->id}', contestName='{$contest->name}': Contest is not associated with category '{$vote->categoryId}'.",
+                "craft-cms-contests",
             );
+            return [
+                "success" => false,
+                "message" => "Invalid category for contest.",
+            ];
         }
 
-        if(!$vote->email) {
-            Craft::error("ERROR: Email address not supplied with incoming vote.", "craft-cms-contests");
-            return array(
-                'success' => false,
-                'message' => "Email address required.",
+        if (!$vote->email) {
+            Craft::error(
+                "ERROR: Email address not supplied with incoming vote.",
+                "craft-cms-contests",
             );
+            return [
+                "success" => false,
+                "message" => "Email address required.",
+            ];
         }
 
         // If sessionProtect is enabled, return immediately if the session timestamp stored
         // for a particular contest has not reached the timeout limit set by the contest.
         // This is to prevent a user with a particular session from sending out many votes
         // with different email addresses.
-        if($contest->sessionProtect) {
-            $sessionContestVoteTimestamp = strtotime(Craft::$app
-                ->getSession()
-                ->get("craft-cms-contests:voteSessionProtectionTimestamp:{$vote->categoryId}"));
+        if ($contest->sessionProtect) {
+            $sessionContestVoteTimestamp = strtotime(
+                Craft::$app
+                    ->getSession()
+                    ->get(
+                        "craft-cms-contests:voteSessionProtectionTimestamp:{$vote->categoryId}",
+                    ),
+            );
 
-            if($sessionContestVoteTimestamp) {
+            if ($sessionContestVoteTimestamp) {
                 $epochNow = strtotime("now");
                 $epochCreatedPlusTimeout = strtotime(
                     "+{$contest->lockoutLength} {$contest->lockoutFrequency}",
-                    $sessionContestVoteTimestamp
+                    $sessionContestVoteTimestamp,
                     // $sessionContestVoteTimestamp->getTimestamp()
                 );
 
-                if($epochNow < $epochCreatedPlusTimeout) {
+                if ($epochNow < $epochCreatedPlusTimeout) {
                     $category = \craft\elements\Category::find()
                         ->id($vote->categoryId)
                         ->one();
 
-                    return array(
-                        'success' => false,
-                        'message' => "You can only vote once every {$contest->lockoutLength} {$contest->lockoutFrequency} for category '{$category->title}'. Please try again soon.",
-                    );
+                    return [
+                        "success" => false,
+                        "message" => "You can only vote once every {$contest->lockoutLength} {$contest->lockoutFrequency} for category '{$category->title}'. Please try again soon.",
+                    ];
                 }
             }
         }
@@ -102,42 +127,60 @@ class CraftcmsContestVoteService extends Component
 
         // Run validations to make sure a record doesn't exist in the database within the lockout timeframe
         $vote->email = strtolower($vote->email);
-        $emailValidation = $this->validateWithinTimeframe('email', $vote->email, $vote->categoryId, $contest);
-        $ipValidation = $this->validateWithinTimeframe('ip', $vote->ip, $vote->categoryId, $contest);
+        $emailValidation = $this->validateWithinTimeframe(
+            "email",
+            $vote->email,
+            $vote->categoryId,
+            $contest,
+        );
+        $ipValidation = $this->validateWithinTimeframe(
+            "ip",
+            $vote->ip,
+            $vote->categoryId,
+            $contest,
+        );
 
         // Return an error message if validations fail
-        if($emailValidation) { // TODD: add $ipValidation as check, disabled for testing
+        if ($emailValidation) {
+            // TODD: add $ipValidation as check, disabled for testing
             $lockoutLength = $contest->lockoutLength;
             $lockoutFrequency = $contest->lockoutFrequency;
-            $lockoutFrequency = $lockoutLength > 1 ? $lockoutFrequency . 's' : $lockoutFrequency;
+            $lockoutFrequency =
+                $lockoutLength > 1
+                    ? $lockoutFrequency . "s"
+                    : $lockoutFrequency;
 
             $category = \craft\elements\Category::find()
                 ->id($vote->categoryId)
                 ->one();
 
-            return array(
-                'success' => false,
-                'message' => "You can only vote once every {$lockoutLength} {$lockoutFrequency} for category '{$category->title}'. Please try again soon.",
-            );
+            return [
+                "success" => false,
+                "message" => "You can only vote once every {$lockoutLength} {$lockoutFrequency} for category '{$category->title}'. Please try again soon.",
+            ];
         }
 
         // If validation passes, save the vote, return a success message
-        if( $vote->save() ) {
+        if ($vote->save()) {
             Craft::$app
                 ->getSession()
-                ->set("craft-cms-contests:voteSessionProtectionTimestamp:{$vote->categoryId}", $vote->dateCreated);
+                ->set(
+                    "craft-cms-contests:voteSessionProtectionTimestamp:{$vote->categoryId}",
+                    $vote->dateCreated,
+                );
 
-            return array(
-                'success' => true,
-                'message' => 'You vote has successfully been saved.',
-            );
+            return [
+                "success" => true,
+                "message" => "You vote has successfully been saved.",
+            ];
         }
 
         // If vote fails to save, return an error message
-        return array(
-            'success' => false,
-            'message' => 'There was an error saving your vote. Please try again soon.',
-        );
+        return [
+            "success" => false,
+            "message" =>
+                "There was an error saving your vote. Please try again soon.",
+        ];
     }
 
     // public function getEntryVoteCount($entryId, $contestId) {
@@ -163,14 +206,13 @@ class CraftcmsContestVoteService extends Component
     //     }
     // }
 
-    public function getAllVoteCountsByContestId($contestId) {
+    public function getAllVoteCountsByContestId($contestId): array
+    {
         $queryResult = CraftcmsContestVoteRecord::find()
-            ->select('count(entryId) as entryCount, entryId')
-            ->where(
-                array(
-                    "contestId" => $contestId
-                )
-            )
+            ->select("count(entryId) as entryCount, entryId")
+            ->where([
+                "contestId" => $contestId,
+            ])
             ->groupBy("entryId")
             ->asArray()
             ->all();
@@ -185,7 +227,7 @@ class CraftcmsContestVoteService extends Component
         //
         // Then afterwards, you can do quick lookups using:
         // $map[123]
-        foreach($queryResult as $result) {
+        foreach ($queryResult as $result) {
             $map[$result["entryId"]] = (int) $result["entryCount"];
         }
 
@@ -193,10 +235,14 @@ class CraftcmsContestVoteService extends Component
     }
 
     // Checks if a field value exists in the database within the lockout timeframe
-    private function validateWithinTimeframe($field, $value, $categoryId, $contest)
-    {
+    private function validateWithinTimeframe(
+        $field,
+        $value,
+        $categoryId,
+        $contest,
+    ): ActiveRecord|array|null {
         $dateRangeCriteria = $this->dateRangeCriteria($contest);
-        $attribs = array($field => $value, 'categoryId' => $categoryId);
+        $attribs = [$field => $value, "categoryId" => $categoryId];
 
         $rows = CraftcmsContestVoteRecord::find()
             ->andWhere(["=", $field, $value])
@@ -208,15 +254,19 @@ class CraftcmsContestVoteService extends Component
     }
 
     // Sets up query criteria for records that fall within the specified time frame
-    private function dateRangeCriteria($contest)
+    private function dateRangeCriteria($contest): array
     {
         $lockoutLength = $contest->lockoutLength;
         $lockoutFrequency = $contest->lockoutFrequency;
 
-        $lockoutFrequency = $lockoutLength > 1 ? $lockoutFrequency . 's' : $lockoutFrequency;
+        $lockoutFrequency =
+            $lockoutLength > 1 ? $lockoutFrequency . "s" : $lockoutFrequency;
 
-        $datePrev = date('Y-m-d H:i:s', strtotime("-{$lockoutLength} {$lockoutFrequency}"));
-        $dateNow = date('Y-m-d H:i:s');
-        return ['between', 'dateCreated', $datePrev, $dateNow];
+        $datePrev = date(
+            "Y-m-d H:i:s",
+            strtotime("-{$lockoutLength} {$lockoutFrequency}"),
+        );
+        $dateNow = date("Y-m-d H:i:s");
+        return ["between", "dateCreated", $datePrev, $dateNow];
     }
 }

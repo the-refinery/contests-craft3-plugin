@@ -1,6 +1,6 @@
 <?php
 /**
- * CraftCMS Contests plugin for Craft CMS 3.x
+ * CraftCMS Contests plugin for Craft CMS 4.x
  *
  * This is a plugin that allows you to run contests with voting in your CraftCMS site
  *
@@ -25,14 +25,13 @@ use craft\base\Widget;
  */
 class CraftcmsContestsWidget extends Widget
 {
-
     // Public Properties
     // =========================================================================
 
     /**
      * @var string
      */
-    public $message = 'Hello, world.';
+    public string $message = "Hello, world.";
 
     // Static Methods
     // =========================================================================
@@ -42,21 +41,23 @@ class CraftcmsContestsWidget extends Widget
      */
     public static function displayName(): string
     {
-        return Craft::t('craft-cms-contests', 'CraftcmsContestsWidget');
+        return Craft::t("craft-cms-contests", "CraftcmsContestsWidget");
     }
 
     /**
      * @inheritdoc
      */
-    public static function iconPath()
+    public static function iconPath(): string|bool
     {
-        return Craft::getAlias("@therefinery/craftcmscontests/assetbundles/craftcmscontestswidgetwidget/dist/img/CraftcmsContestsWidget-icon.svg");
+        return Craft::getAlias(
+            "@therefinery/craftcmscontests/assetbundles/craftcmscontestswidgetwidget/dist/img/CraftcmsContestsWidget-icon.svg",
+        );
     }
 
     /**
      * @inheritdoc
      */
-    public static function maxColspan()
+    public static function maxColspan(): ?int
     {
         return null;
     }
@@ -67,44 +68,47 @@ class CraftcmsContestsWidget extends Widget
     /**
      * @inheritdoc
      */
-    public function rules()
+    public function rules(): array
     {
         $rules = parent::rules();
-        $rules = array_merge(
-            $rules,
-            [
-                ['message', 'string'],
-                ['message', 'default', 'value' => 'Hello, world.'],
-            ]
-        );
+        $rules = array_merge($rules, [
+            ["message", "string"],
+            ["message", "default", "value" => "Hello, world."],
+        ]);
         return $rules;
     }
 
     /**
      * @inheritdoc
      */
-    public function getSettingsHtml()
+    public function getSettingsHtml(): ?string
     {
-        return Craft::$app->getView()->renderTemplate(
-            'craft-cms-contests/_components/widgets/CraftcmsContestsWidget_settings',
-            [
-                'widget' => $this
-            ]
-        );
+        return Craft::$app
+            ->getView()
+            ->renderTemplate(
+                "craft-cms-contests/_components/widgets/CraftcmsContestsWidget_settings",
+                [
+                    "widget" => $this,
+                ],
+            );
     }
 
     /**
      * @inheritdoc
      */
-    public function getBodyHtml()
+    public function getBodyHtml(): ?string
     {
-        Craft::$app->getView()->registerAssetBundle(CraftcmsContestsWidgetWidgetAsset::class);
+        Craft::$app
+            ->getView()
+            ->registerAssetBundle(CraftcmsContestsWidgetWidgetAsset::class);
 
-        return Craft::$app->getView()->renderTemplate(
-            'craft-cms-contests/_components/widgets/CraftcmsContestsWidget_body',
-            [
-                'message' => $this->message
-            ]
-        );
+        return Craft::$app
+            ->getView()
+            ->renderTemplate(
+                "craft-cms-contests/_components/widgets/CraftcmsContestsWidget_body",
+                [
+                    "message" => $this->message,
+                ],
+            );
     }
 }

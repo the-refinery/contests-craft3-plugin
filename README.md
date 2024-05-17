@@ -1,26 +1,25 @@
-# CraftCMS Contests plugin for Craft CMS 3.x
+# CraftCMS Contests plugin for Craft CMS 4.x
 
 Create contests with voting on CraftCMS entries.
 
 ![Screenshot](src/icon.svg)
 
+# Table of Contents
 
-Table of Contents
-=================
-* [Requirements](#requirements)
-* [Installation](#installation)
-  * [Development](#development)
-  * [Non-development](#non-development)
-* [CraftCMS Contests Overview](#craftcms-contests-overview)
-* [Configuring CraftCMS Contests](#configuring-craftcms-contests)
-* [Using CraftCMS Contests](#using-craftcms-contests)
-  * [Asynchronously](#asynchronously)
-  * [Traditional Form POST](#traditional-form-post)
-* [CraftCMS Contests Roadmap](#craftcms-contests-roadmap)
+- [Requirements](#requirements)
+- [Installation](#installation)
+  - [Development](#development)
+  - [Non-development](#non-development)
+- [CraftCMS Contests Overview](#craftcms-contests-overview)
+- [Configuring CraftCMS Contests](#configuring-craftcms-contests)
+- [Using CraftCMS Contests](#using-craftcms-contests)
+  - [Asynchronously](#asynchronously)
+  - [Traditional Form POST](#traditional-form-post)
+- [CraftCMS Contests Roadmap](#craftcms-contests-roadmap)
 
 ## Requirements
 
-This plugin requires Craft CMS 3.0.0-beta.23 or later.
+This plugin requires Craft CMS 4 or later.
 
 ## Installation
 
@@ -28,22 +27,25 @@ This plugin requires Craft CMS 3.0.0-beta.23 or later.
 
 If you would like to install this plugin for development or debugging purposes:
 
-1. Create a subfolder in your CraftCMS project that Craft has access to. For example: `<craft-root>/plugins/therefinery/craftcmscontests`
-1. Go into that directory and clone this repo:  `git clone git@github.com:the-refinery/contests-craft3-plugin.git .` or use a forked URL if you have forked this project
-1. Make sure to `.gitignore` the `plugins/therefinery/craftcmscontests` directory (even if it's temporary) as it will already have it's own git setup and you do not want to include these files with your main Craft project's git repo.
-1. In `composer.json` add a path repository in the `repositories` block, such as:
+1.  Create a subfolder in your CraftCMS project that Craft has access to. For example: `<craft-root>/plugins/therefinery/craftcmscontests`
+1.  Go into that directory and clone this repo: `git clone git@github.com:the-refinery/contests-craft3-plugin.git .` or use a forked URL if you have forked this project
+1.  Make sure to `.gitignore` the `plugins/therefinery/craftcmscontests` directory (even if it's temporary) as it will already have it's own git setup and you do not want to include these files with your main Craft project's git repo.
+1.  In `composer.json` add a path repository in the `repositories` block, such as:
 
         {
          "type": "path",
          "url": "plugins/therefinery/craftcmscontests"
         }
-1. In `composer.json` add the requirement within your `require` block:
+
+1.  In `composer.json` add the requirement within your `require` block:
 
         "therefinery/craft-cms-contests": "^1.0"
-1. Run `composer require therefinery/craft-cms-contests`
-1. Log into the CraftCMS admin panel and install the plugin like you would for any other plugin.
+
+1.  Run `composer require therefinery/craft-cms-contests`
+1.  Log into the CraftCMS admin panel and install the plugin like you would for any other plugin.
 
 ### Non-development
+
 Use these steps if you just want to install and use the plugin without making any modifications for maintenance.
 
 1.  In `composer.json` add a vcs repository in the `repositories` block:
@@ -52,11 +54,13 @@ Use these steps if you just want to install and use the plugin without making an
           "type": "vcs",
           "url": "https://github.com/the-refinery/contests-craft3-plugin"
         }
-1. In `composer.json` add the requirement within your `require` block:
+
+1.  In `composer.json` add the requirement within your `require` block:
 
         "therefinery/craft-cms-contests": "^1.0"
-1. Run `composer require therefinery/craft-cms-contests`
-1. Log into the CraftCMS admin panel and install the plug like you would for any other plugin.
+
+1.  Run `composer require therefinery/craft-cms-contests`
+1.  Log into the CraftCMS admin panel and install the plug like you would for any other plugin.
 
 [Back to Table of Contents &uarr;](#table-of-contents)
 
@@ -73,19 +77,19 @@ There are some very basic security measures in place, such as CSRF tokens and en
 Once you have the plugin installed and enabled, you will need to determine a
 few things before you can create your first contest:
 
-* What do you want to name your contest?
-* What categories (new or existing) do you want your users to vote on?
-* What kind of lockout period do you want? One vote every 5 minutes? Every 24 hours?
-* Do you want to use reCaptcha?
+- What do you want to name your contest?
+- What categories (new or existing) do you want your users to vote on?
+- What kind of lockout period do you want? One vote every 5 minutes? Every 24 hours?
+- Do you want to use reCaptcha?
 
 Next, you will want to log into the CraftCMS admin control panel if you are not there already. If you do not have the categories in which you want users to vote on, you will want to create those first. Next, in the left hand admin menu, click on "CraftCMS Contests > Contests". On the CraftCMS contests listing page, click the "Create a Contest" button.
 
-* Set the contest to Enabled if you prefer to make it live right away. It defaults to disabled.
-* Give the contest a name
-* Give the contest a good handle (you will need this later on)
-* Choose at least one category in which to vote
-* Set a lockout length. For example, if you wanted to prevent people from voting more than once every 5 minutes for the same category, set 5 for the "Voting Lockout Length" and "minutes" from the "Voting Lockout Frequency"
-* Optionally add a reCaptcha secret key
+- Set the contest to Enabled if you prefer to make it live right away. It defaults to disabled.
+- Give the contest a name
+- Give the contest a good handle (you will need this later on)
+- Choose at least one category in which to vote
+- Set a lockout length. For example, if you wanted to prevent people from voting more than once every 5 minutes for the same category, set 5 for the "Voting Lockout Length" and "minutes" from the "Voting Lockout Frequency"
+- Optionally add a reCaptcha secret key
 
 With your new contest created, the next step is to create the entries to vote on. These entries ordinary CraftCMS entries so creating those is beyond the scope of this document. Generally the best way to set them up is to create a unique section for your votable entries. The key point, however, is to ensure that your entries belong to the votable categories. When voting on an entry, you're actually voting on an entry that belongs to a category, where that same category belongs to a contest. Without that link from entry > category > contest, the votes will not be valid.
 
@@ -99,11 +103,11 @@ With a contest set up, the final step is to set up the front end in which to cas
 
 CraftCMS Contests allows for votes to be cast in an asynchronous fashion using AJAX. In order to use this functionality, you will need to collect several pieces of _required_ information before processing the request:
 
-* A CSRF token
-* The Contest ID
-* The Entry ID
-* The Category ID
-* An email address
+- A CSRF token
+- The Contest ID
+- The Entry ID
+- The Category ID
+- An email address
 
 The folowing is a very simple example of a Twig template that could be used to gather such information. Granted each project is unique in how it is structured and designed, but this is to simply demonstrate what pieces of information you will need and how to get them in order to make a successful vote:
 
@@ -246,7 +250,6 @@ $("#food-vote").submit(function(e){
 });
 </script>
 ```
-
 
 Upon a successful vote cast, the following is returned along with an HTTP/200:
 

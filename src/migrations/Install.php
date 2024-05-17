@@ -1,6 +1,6 @@
 <?php
 /**
- * CraftCMS Contests plugin for Craft CMS 3.x
+ * CraftCMS Contests plugin for Craft CMS 4.x
  *
  * This is a plugin that allows you to run contests with voting in your CraftCMS site
  *
@@ -29,7 +29,7 @@ class Install extends Migration
     /**
      * @var string The database driver to use
      */
-    public $driver;
+    public string $driver;
 
     // Public Methods
     // =========================================================================
@@ -37,7 +37,7 @@ class Install extends Migration
     /**
      * @inheritdoc
      */
-    public function safeUp()
+    public function safeUp(): bool|null|mixed
     {
         $this->driver = Craft::$app->getConfig()->getDb()->driver;
         if ($this->createTables()) {
@@ -51,10 +51,10 @@ class Install extends Migration
         return true;
     }
 
-   /**
+    /**
      * @inheritdoc
      */
-    public function safeDown()
+    public function safeDown(): bool|null|mixed
     {
         $this->driver = Craft::$app->getConfig()->getDb()->driver;
         $this->removeTables();
@@ -68,53 +68,59 @@ class Install extends Migration
     /**
      * @return bool
      */
-    protected function createTables()
+    protected function createTables(): bool
     {
         $tablesCreated = false;
 
-        $tableSchema = Craft::$app->db->schema->getTableSchema('{{%craftcms_contests}}');
+        $tableSchema = Craft::$app->db->schema->getTableSchema(
+            "{{%craftcms_contests}}",
+        );
         if ($tableSchema === null) {
             $tablesCreated = true;
-            $this->createTable(
-                '{{%craftcms_contests}}',
-                [
-                    'id' => $this->primaryKey(),
-                    'uid' => $this->uid(),
-                    'dateCreated' => $this->dateTime()->notNull(),
-                    'dateUpdated' => $this->dateTime()->notNull(),
-                    'name' => $this->string(255)->notNull(),
-                    'handle' => $this->string()->notNull(),
-                    'categories' => $this->text()->null(),
-                    'dateStart' => $this->dateTime()->null(),
-                    'dateEnd' => $this->dateTime()->null(),
-                    'lockoutLength' => $this->integer()->defaultValue(24)->null(),
-                    'lockoutFrequency' => $this->string(64)->defaultValue("hour")->null(),
-                    'enabled' => $this->boolean()->defaultValue(true)->null(),
-                    'sessionProtect' => $this->boolean()->defaultValue(true)->null(),
-                    'recaptchaSecret' => $this->text()->null(),
-                ]
-            );
+            $this->createTable("{{%craftcms_contests}}", [
+                "id" => $this->primaryKey(),
+                "uid" => $this->uid(),
+                "dateCreated" => $this->dateTime()->notNull(),
+                "dateUpdated" => $this->dateTime()->notNull(),
+                "name" => $this->string(255)->notNull(),
+                "handle" => $this->string()->notNull(),
+                "categories" => $this->text()->null(),
+                "dateStart" => $this->dateTime()->null(),
+                "dateEnd" => $this->dateTime()->null(),
+                "lockoutLength" => $this->integer()
+                    ->defaultValue(24)
+                    ->null(),
+                "lockoutFrequency" => $this->string(64)
+                    ->defaultValue("hour")
+                    ->null(),
+                "enabled" => $this->boolean()
+                    ->defaultValue(true)
+                    ->null(),
+                "sessionProtect" => $this->boolean()
+                    ->defaultValue(true)
+                    ->null(),
+                "recaptchaSecret" => $this->text()->null(),
+            ]);
         }
 
-        $tableSchema = Craft::$app->db->schema->getTableSchema('{{%craftcms_contests_votes}}');
+        $tableSchema = Craft::$app->db->schema->getTableSchema(
+            "{{%craftcms_contests_votes}}",
+        );
         if ($tableSchema === null) {
             $tablesCreated = true;
-            $this->createTable(
-                '{{%craftcms_contests_votes}}',
-                [
-                    'id' => $this->primaryKey(),
-                    'dateCreated' => $this->dateTime()->notNull(),
-                    'dateUpdated' => $this->dateTime()->notNull(),
-                    'uid' => $this->uid(),
-                    'contestId' => $this->integer()->null(),
-                    'categoryId' => $this->integer()->null(),
-                    'entryId' => $this->integer()->null(),
-                    'email' => $this->string(255)->null(),
-                    'ip' => $this->string(255)->null(),
-                    'extraData' => $this->text()->null(),
-                    'userAgent' => $this->string(512)->null(),
-                ]
-            );
+            $this->createTable("{{%craftcms_contests_votes}}", [
+                "id" => $this->primaryKey(),
+                "dateCreated" => $this->dateTime()->notNull(),
+                "dateUpdated" => $this->dateTime()->notNull(),
+                "uid" => $this->uid(),
+                "contestId" => $this->integer()->null(),
+                "categoryId" => $this->integer()->null(),
+                "entryId" => $this->integer()->null(),
+                "email" => $this->string(255)->null(),
+                "ip" => $this->string(255)->null(),
+                "extraData" => $this->text()->null(),
+                "userAgent" => $this->string(512)->null(),
+            ]);
         }
 
         return $tablesCreated;
@@ -123,40 +129,57 @@ class Install extends Migration
     /**
      * @return void
      */
-    protected function createIndexes()
+    protected function createIndexes(): void
     {
-        $this->createIndex(null, '{{%craftcms_contests}}', ['name'], true);
-        $this->createIndex(null, '{{%craftcms_contests}}', ['handle'], true);
+        $this->createIndex(null, "{{%craftcms_contests}}", ["name"], true);
+        $this->createIndex(null, "{{%craftcms_contests}}", ["handle"], true);
 
-        $this->createIndex(null, '{{%craftcms_contests_votes}}', ['email'], false);
-        $this->createIndex(null, '{{%craftcms_contests_votes}}', ['email', 'categoryId'], false);
+        $this->createIndex(
+            null,
+            "{{%craftcms_contests_votes}}",
+            ["email"],
+            false,
+        );
+        $this->createIndex(
+            null,
+            "{{%craftcms_contests_votes}}",
+            ["email", "categoryId"],
+            false,
+        );
     }
 
     /**
      * @return void
      */
-    protected function addForeignKeys()
+    protected function addForeignKeys(): void
     {
-        $this->addForeignKey(null, '{{%craftcms_contests_votes}}', ['contestId'], '{{%craftcms_contests}}', ['id'], 'CASCADE', null);
+        $this->addForeignKey(
+            null,
+            "{{%craftcms_contests_votes}}",
+            ["contestId"],
+            "{{%craftcms_contests}}",
+            ["id"],
+            "CASCADE",
+            null,
+        );
     }
 
     /**
      * @return void
      */
-    protected function insertDefaultData()
+    protected function insertDefaultData(): void
     {
     }
 
     /**
      * @return void
      */
-    protected function removeTables()
+    protected function removeTables(): void
     {
-        $this->dropTableIfExists('{{%craftcms_contests_votes}}');
-        $this->dropTableIfExists('{{%craftcms_contests}}');
+        $this->dropTableIfExists("{{%craftcms_contests_votes}}");
+        $this->dropTableIfExists("{{%craftcms_contests}}");
     }
 }
-
 
 /*
 
@@ -219,4 +242,3 @@ mysql> show index from craft_contestify_contests;
 | craft_contestify_contests |          0 | craft_contestify_contests_handle_unq_idx |            1 | handle      | A         |           2 |     NULL | NULL   |      | BTREE      |         |               |
 +---------------------------+------------+------------------------------------------+--------------+-------------+-----------+-------------+----------+--------+------+------------+---------+---------------+
 */
-

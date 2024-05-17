@@ -1,6 +1,6 @@
 <?php
 /**
- * CraftCMS Contests plugin for Craft CMS 3.x
+ * CraftCMS Contests plugin for Craft CMS 4.x
  *
  * This is a plugin that allows you to run contests with voting in your CraftCMS site
  *
@@ -18,6 +18,7 @@ use therefinery\craftcmscontests\utilities\CraftcmsContestsUtility as CraftcmsCo
 use therefinery\craftcmscontests\widgets\CraftcmsContestsWidget as CraftcmsContestsWidgetWidget;
 
 use Craft;
+use craft\base\Model;
 use craft\base\Plugin;
 use craft\services\Plugins;
 use craft\events\PluginEvent;
@@ -58,17 +59,17 @@ class CraftcmsContests extends Plugin
     /**
      * @var string
      */
-    public $schemaVersion = '1.0.3';
+    public string $schemaVersion = "4.0.0";
 
     /**
      * @var bool
      */
-    public $hasCpSettings = false;
+    public bool $hasCpSettings = false;
 
     /**
      * @var bool
      */
-    public $hasCpSection = true;
+    public bool $hasCpSection = true;
 
     // Public Methods
     // =========================================================================
@@ -76,41 +77,56 @@ class CraftcmsContests extends Plugin
     /**
      * @inheritdoc
      */
-    public function init()
+    public function init(): void
     {
         parent::init();
         self::$plugin = $this;
         $this->setComponents([
-            'contestService' => \therefinery\craftcmscontests\services\CraftcmsContestService::class,
-            'contestVoteService' => \therefinery\craftcmscontests\services\CraftcmsContestVoteService::class,
+            "contestService" =>
+                \therefinery\craftcmscontests\services\CraftcmsContestService::class,
+            "contestVoteService" =>
+                \therefinery\craftcmscontests\services\CraftcmsContestVoteService::class,
         ]);
 
-        Craft::$app->view->registerTwigExtension(new CraftcmsContestsTwigExtension());
+        Craft::$app->view->registerTwigExtension(
+            new CraftcmsContestsTwigExtension(),
+        );
 
         if (Craft::$app instanceof ConsoleApplication) {
-            $this->controllerNamespace = 'therefinery\craftcmscontests\console\controllers';
+            $this->controllerNamespace =
+                "therefinery\craftcmscontests\console\controllers";
         }
 
         Event::on(
             UrlManager::class,
             UrlManager::EVENT_REGISTER_SITE_URL_RULES,
             function (RegisterUrlRulesEvent $event) {
-                $event->rules['craft-cms-contests/votes/saveVoteAsync'] = 'craft-cms-contests/votes/save-vote-async';
-                $event->rules['craft-cms-contests/votes/saveVote'] = 'craft-cms-contests/votes/save-vote';
-            }
+                $event->rules["craft-cms-contests/votes/saveVoteAsync"] =
+                    "craft-cms-contests/votes/save-vote-async";
+                $event->rules["craft-cms-contests/votes/saveVote"] =
+                    "craft-cms-contests/votes/save-vote";
+            },
         );
 
         Event::on(
             UrlManager::class,
             UrlManager::EVENT_REGISTER_CP_URL_RULES,
             function (RegisterUrlRulesEvent $event) {
-                $event->rules['craft-cms-contests/contests'] = 'craft-cms-contests/contests/index';
-                $event->rules['craft-cms-contests/contests/new'] = 'craft-cms-contests/contests/edit';
-                $event->rules['craft-cms-contests/contests/delete'] = 'craft-cms-contests/contests/delete';
-                $event->rules['craft-cms-contests/contests/<contestId:\d+>/edit'] = 'craft-cms-contests/contests/edit';
-                $event->rules['craft-cms-contests/votes'] = 'craft-cms-contests/votes/index';
-                $event->rules['craft-cms-contests/votes-by-contest/<contestId:\d+>'] = 'craft-cms-contests/votes/votes-by-contest';
-            }
+                $event->rules["craft-cms-contests/contests"] =
+                    "craft-cms-contests/contests/index";
+                $event->rules["craft-cms-contests/contests/new"] =
+                    "craft-cms-contests/contests/edit";
+                $event->rules["craft-cms-contests/contests/delete"] =
+                    "craft-cms-contests/contests/delete";
+                $event->rules[
+                    "craft-cms-contests/contests/<contestId:\d+>/edit"
+                ] = "craft-cms-contests/contests/edit";
+                $event->rules["craft-cms-contests/votes"] =
+                    "craft-cms-contests/votes/index";
+                $event->rules[
+                    "craft-cms-contests/votes-by-contest/<contestId:\d+>"
+                ] = "craft-cms-contests/votes/votes-by-contest";
+            },
         );
 
         Event::on(
@@ -118,7 +134,7 @@ class CraftcmsContests extends Plugin
             Utilities::EVENT_REGISTER_UTILITY_TYPES,
             function (RegisterComponentTypesEvent $event) {
                 $event->types[] = CraftcmsContestsUtilityUtility::class;
-            }
+            },
         );
 
         Event::on(
@@ -126,18 +142,16 @@ class CraftcmsContests extends Plugin
             Dashboard::EVENT_REGISTER_WIDGET_TYPES,
             function (RegisterComponentTypesEvent $event) {
                 $event->types[] = CraftcmsContestsWidgetWidget::class;
-            }
+            },
         );
 
-        Event::on(
-            CraftVariable::class,
-            CraftVariable::EVENT_INIT,
-            function (Event $event) {
-                /** @var CraftVariable $variable */
-                $variable = $event->sender;
-                $variable->set('craftcmsContests', CraftcmsContestsVariable::class);
-            }
-        );
+        Event::on(CraftVariable::class, CraftVariable::EVENT_INIT, function (
+            Event $event,
+        ) {
+            /** @var CraftVariable $variable */
+            $variable = $event->sender;
+            $variable->set("craftcmsContests", CraftcmsContestsVariable::class);
+        });
 
         Event::on(
             Plugins::class,
@@ -145,16 +159,14 @@ class CraftcmsContests extends Plugin
             function (PluginEvent $event) {
                 if ($event->plugin === $this) {
                 }
-            }
+            },
         );
 
         Craft::info(
-            Craft::t(
-                'craft-cms-contests',
-                '{name} plugin loaded',
-                ['name' => $this->name]
-            ),
-            __METHOD__
+            Craft::t("craft-cms-contests", "{name} plugin loaded", [
+                "name" => $this->name,
+            ]),
+            __METHOD__,
         );
     }
 
@@ -164,7 +176,7 @@ class CraftcmsContests extends Plugin
     /**
      * @inheritdoc
      */
-    protected function createSettingsModel()
+    protected function createSettingsModel(): ?Model
     {
         return new Settings();
     }
@@ -172,22 +184,28 @@ class CraftcmsContests extends Plugin
     /**
      * @inheritdoc
      */
-    protected function settingsHtml(): string
+    protected function settingsHtml(): ?string
     {
         return Craft::$app->view->renderTemplate(
-            'craft-cms-contests/settings',
+            "craft-cms-contests/settings",
             [
-                'settings' => $this->getSettings()
-            ]
+                "settings" => $this->getSettings(),
+            ],
         );
     }
 
-    public function getCpNavItem()
+    public function getCpNavItem(): ?array
     {
         $item = parent::getCpNavItem();
-        $item['subnav'] = [
-            'contests' => ['label' => 'Contests', 'url' => 'craft-cms-contests/contests'],
-            'votes' => ['label' => 'Votes', 'url' => 'craft-cms-contests/votes'],
+        $item["subnav"] = [
+            "contests" => [
+                "label" => "Contests",
+                "url" => "craft-cms-contests/contests",
+            ],
+            "votes" => [
+                "label" => "Votes",
+                "url" => "craft-cms-contests/votes",
+            ],
         ];
         return $item;
     }

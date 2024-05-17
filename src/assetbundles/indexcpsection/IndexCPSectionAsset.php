@@ -1,6 +1,6 @@
 <?php
 /**
- * CraftCMS Contests plugin for Craft CMS 3.x
+ * CraftCMS Contests plugin for Craft CMS 4.x
  *
  * This is a plugin that allows you to run contests with voting in your CraftCMS site
  *
@@ -27,21 +27,16 @@ class IndexCPSectionAsset extends AssetBundle
     /**
      * @inheritdoc
      */
-    public function init()
+    public function init(): void
     {
-        $this->sourcePath = "@therefinery/craftcmscontests/assetbundles/indexcpsection/dist";
+        $this->sourcePath =
+            "@therefinery/craftcmscontests/assetbundles/indexcpsection/dist";
 
-        $this->depends = [
-            CpAsset::class,
-        ];
+        $this->depends = [CpAsset::class];
 
-        $this->js = [
-            'js/Index.js',
-        ];
+        $this->js = ["js/Index.js"];
 
-        $this->css = [
-            'css/Index.css',
-        ];
+        $this->css = ["css/Index.css"];
 
         parent::init();
     }

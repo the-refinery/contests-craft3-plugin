@@ -1,6 +1,6 @@
 <?php
 /**
- * CraftCMS Contests plugin for Craft CMS 3.x
+ * CraftCMS Contests plugin for Craft CMS 4.x
  *
  * This is a plugin that allows you to run contests with voting in your CraftCMS site
  *
@@ -27,21 +27,16 @@ class CraftcmsContestsWidgetWidgetAsset extends AssetBundle
     /**
      * @inheritdoc
      */
-    public function init()
+    public function init(): void
     {
-        $this->sourcePath = "@therefinery/craftcmscontests/assetbundles/craftcmscontestswidgetwidget/dist";
+        $this->sourcePath =
+            "@therefinery/craftcmscontests/assetbundles/craftcmscontestswidgetwidget/dist";
 
-        $this->depends = [
-            CpAsset::class,
-        ];
+        $this->depends = [CpAsset::class];
 
-        $this->js = [
-            'js/CraftcmsContestsWidget.js',
-        ];
+        $this->js = ["js/CraftcmsContestsWidget.js"];
 
-        $this->css = [
-            'css/CraftcmsContestsWidget.css',
-        ];
+        $this->css = ["css/CraftcmsContestsWidget.css"];
 
         parent::init();
     }
