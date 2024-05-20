@@ -37,7 +37,7 @@ class Install extends Migration
     /**
      * @inheritdoc
      */
-    public function safeUp(): bool|null|mixed
+    public function safeUp(): mixed
     {
         $this->driver = Craft::$app->getConfig()->getDb()->driver;
         if ($this->createTables()) {
@@ -54,7 +54,7 @@ class Install extends Migration
     /**
      * @inheritdoc
      */
-    public function safeDown(): bool|null|mixed
+    public function safeDown(): mixed
     {
         $this->driver = Craft::$app->getConfig()->getDb()->driver;
         $this->removeTables();
