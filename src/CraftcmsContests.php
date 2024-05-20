@@ -59,7 +59,7 @@ class CraftcmsContests extends Plugin
     /**
      * @var string
      */
-    public string $schemaVersion = "4.0.0";
+    public string $schemaVersion = "4.0.1";
 
     /**
      * @var bool

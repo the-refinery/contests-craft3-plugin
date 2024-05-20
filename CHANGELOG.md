@@ -18,3 +18,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 - Version numbering update to reflect version of Craft, 4.x
 - Template Updates
 - CP URL change from /admin/ to /admin-frogtape/
+
+## 4.0.1 - 2024-05-20
+
+### Update
+
+- Fix for PHP mixed type error
