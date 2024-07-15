@@ -109,7 +109,7 @@ class CraftcmsContestService extends Component
         }
     }
 
-    public function deleteContestAndVotesById($contestId): true
+    public function deleteContestAndVotesById($contestId): bool
     {
         if (isset($contestId) && !empty($contestId)) {
             $transaction =

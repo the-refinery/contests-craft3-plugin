@@ -2,7 +2,7 @@
   "name": "therefinery/craft-cms-contests",
   "description": "This is a plugin that allows you to run contests with voting in your CraftCMS site",
   "type": "craft-plugin",
-  "version": "4.0.4",
+  "version": "4.0.5",
   "keywords": [
     "craft",
     "cms",
