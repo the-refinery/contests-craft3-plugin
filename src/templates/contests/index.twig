@@ -41,7 +41,7 @@
                         {{ contest.handle }}
                     </td>
                     <td data-title="{{ "Categories"|t }}" class="categories">
-                        {% set categories = contest.categories ? craft.categories.id(contest.categories|json_decode) %}
+                        {% set categories = contest.categories ? craft.categories.id(contest.categories|json_decode).all() %}
                         {% for category in categories %}
                             {{ category.title }}
                             {{ not loop.last ? ', ' }}
