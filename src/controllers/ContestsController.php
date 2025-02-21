@@ -106,7 +106,7 @@ class ContestsController extends Controller
             );
         }
 
-        return $this->redirect("/admin-frogtape/craft-cms-contests/contests/");
+        return $this->redirect("/" . Craft::$app->getConfig()->getGeneral()->cpTrigger . "/craft-cms-contests/contests/");
     }
 
     public function actionDelete($id = null): Response
