@@ -162,6 +162,12 @@ class CraftcmsContestVoteService extends Component
 
         // If validation passes, save the vote, return a success message
         if ($vote->save()) {
+
+            $extraData = json_decode($vote->extraData);
+            if(getenv('ACTON_VOTING_ENABLED') && $extraData->offers) {
+                $this->sendVoterToActon($vote);
+            }
+
             Craft::$app
                 ->getSession()
                 ->set(
@@ -232,6 +238,90 @@ class CraftcmsContestVoteService extends Component
         }
 
         return $map;
+    }
+
+    public function sendVoterToActon($vote) {
+        $extraData = json_decode($vote->extraData);
+        $uri = 'https://api.actonsoftware.com/api/1/list/l-000d/record?email=' . $vote->email;
+        $postfields = json_encode(["EMAIL"=>$vote->email,"FIRSTNAME"=>$extraData->fn,"LASTNAME"=>$extraData->ln]);
+
+        $actonToken = $this->getActonToken();
+
+        $curl = curl_init();
+
+        curl_setopt_array($curl, [
+          CURLOPT_URL => "https://api.actonsoftware.com/api/1/list/l-000d/record?email=".$vote->email,
+          CURLOPT_RETURNTRANSFER => true,
+          CURLOPT_ENCODING => "",
+          CURLOPT_MAXREDIRS => 10,
+          CURLOPT_TIMEOUT => 30,
+          CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+          CURLOPT_CUSTOMREQUEST => "PUT",
+          CURLOPT_POSTFIELDS => $postfields,
+          CURLOPT_HTTPHEADER => [
+            "Authorization: Bearer " . $actonToken,
+            "accept: application/json",
+            "content-type: application/json"
+          ],
+        ]);
+
+        $response = curl_exec($curl);
+        $err = curl_error($curl);
+
+        curl_close($curl);
+
+        // if ($err) {
+        //   echo "cURL Error #:" . $err;
+        // } else {
+        //   echo $response;
+        // }
+    }
+
+    public function getActonToken() {
+
+        $cache = Craft::$app->getCache();
+        $cacheExpirationSeconds = 3550; // 0 seconds = never expires, 1 second = small amount of time to expire (i.e. "disable" caching)
+        $cacheKey = "actonToken";
+        $cache->delete($cacheKey);
+
+        return $cache->getOrSet(
+            $cacheKey,
+            function() {
+                $curl = curl_init();
+                $url = 'https://api.actonsoftware.com/token';
+                $postfields = 'username=' . env('ACTON_USERNAME');
+                $postfields .= '&password=' . env('ACTON_PASSWORD');
+                $postfields .= '&client_id=' . env('ACTON_API_CLIENT_ID');
+                $postfields .= '&client_secret=' . env('ACTON_API_CLIENT_SECRET');
+                $postfields .= '&grant_type=password';
+                curl_setopt_array($curl, [
+                    CURLOPT_URL => $url,
+                    CURLOPT_RETURNTRANSFER => true,
+                    CURLOPT_ENCODING => "",
+                    CURLOPT_MAXREDIRS => 10,
+                    CURLOPT_TIMEOUT => 30,
+                    CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+                    CURLOPT_CUSTOMREQUEST => "POST",
+                    CURLOPT_POSTFIELDS => $postfields,
+                    CURLOPT_HTTPHEADER => [
+                        "accept: application/json",
+                        "content-type: application/x-www-form-urlencoded"
+                    ]
+                ]);
+                $response = curl_exec($curl);
+                $err = curl_error($curl);
+
+                curl_close($curl);
+                if ($err) {
+                    throw new \Exception($error_msg);
+                } 
+
+                $response = json_decode($response);
+
+                return $response->access_token;
+
+            },
+            $cacheExpirationSeconds);
     }
 
     // Checks if a field value exists in the database within the lockout timeframe
