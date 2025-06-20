@@ -33,6 +33,7 @@ class CraftcmsContestVoteService extends Component
         CraftcmsContestVoteRecord $vote,
         CraftcmsContestRecord $contest,
     ): ?array {
+        Craft::info("Starting saveVote for contest ID: {$contest->id}, category ID: {$vote->categoryId}", 'craft-cms-contests');
         if (!$contest) {
             Craft::error(
                 "ERROR: Incoming vote with contestId='{$vote->contestId}': Contest not found. ",
@@ -89,36 +90,74 @@ class CraftcmsContestVoteService extends Component
             ];
         }
 
-        // If sessionProtect is enabled, return immediately if the session timestamp stored
-        // for a particular contest has not reached the timeout limit set by the contest.
-        // This is to prevent a user with a particular session from sending out many votes
-        // with different email addresses.
+        // If sessionProtect is enabled, check if the user has already voted in the current period
+        Craft::info("Session protection is " . ($contest->sessionProtect ? 'ENABLED' : 'DISABLED'), 'craft-cms-contests');
         if ($contest->sessionProtect) {
-            $sessionContestVoteTimestamp = strtotime(
-                Craft::$app
-                    ->getSession()
-                    ->get(
-                        "craft-cms-contests:voteSessionProtectionTimestamp:{$vote->categoryId}",
-                    ),
-            );
+            $sessionKey = "craft-cms-contests:voteSessionProtectionTimestamp:{$vote->categoryId}";
+            $session = Craft::$app->getSession();
+            $sessionContestVoteTimestamp = $session->get($sessionKey);
 
             if ($sessionContestVoteTimestamp) {
-                $epochNow = strtotime("now");
-                $epochCreatedPlusTimeout = strtotime(
-                    "+{$contest->lockoutLength} {$contest->lockoutFrequency}",
-                    $sessionContestVoteTimestamp,
-                    // $sessionContestVoteTimestamp->getTimestamp()
-                );
+                $lockoutFrequency = strtolower($contest->lockoutFrequency);
+                $now = new \DateTime('now', new \DateTimeZone('America/New_York'));
 
-                if ($epochNow < $epochCreatedPlusTimeout) {
-                    $category = \craft\elements\Category::find()
-                        ->id($vote->categoryId)
-                        ->one();
+                if ($lockoutFrequency === 'daily') {
+                    // For daily frequency, check against the reset time
+                    $resetTime = trim(getenv('CRAFT_DAILY_RESET_TIME') ?: '00:00', "'\"");
+                    Craft::info("Using reset time from env: '{$resetTime}'", 'craft-cms-contests');
 
-                    return [
-                        "success" => false,
-                        "message" => "You can only vote once every {$contest->lockoutLength} {$contest->lockoutFrequency} for category '{$category->title}'. Please try again soon.",
-                    ];
+                    $resetTimeToday = new \DateTime($now->format('Y-m-d') . ' ' . $resetTime, new \DateTimeZone('America/New_York'));
+
+                    // If current time is before reset time, use yesterday's reset time as the start of the period
+                    $startOfPeriod = $now < $resetTimeToday
+                        ? (clone $resetTimeToday)->modify('-1 day')
+                        : $resetTimeToday;
+
+                    Craft::info(sprintf(
+                        "Current time: %s, Reset time today: %s, Start of period: %s",
+                        $now->format('Y-m-d H:i:s T'),
+                        $resetTimeToday->format('Y-m-d H:i:s T'),
+                        $startOfPeriod->format('Y-m-d H:i:s T')
+                    ), 'craft-cms-contests');
+
+                    // Check if the last vote was after the start of the current period
+                    $lastVoteTime = new \DateTime($sessionContestVoteTimestamp, new \DateTimeZone('America/New_York'));
+
+                    Craft::info(sprintf(
+                        "Last vote time: %s, Start of period: %s, Comparison: %s",
+                        $lastVoteTime->format('Y-m-d H:i:s T'),
+                        $startOfPeriod->format('Y-m-d H:i:s T'),
+                        $lastVoteTime >= $startOfPeriod ? 'VOTED' : 'CAN VOTE'
+                    ), 'craft-cms-contests');
+
+                    if ($lastVoteTime >= $startOfPeriod) {
+                        $category = \craft\elements\Category::find()
+                            ->id($vote->categoryId)
+                            ->one();
+
+                        return [
+                            "success" => false,
+                            "message" => "You have already voted today. You can vote again after " . $resetTimeToday->format('g:i A') . ".",
+                        ];
+                    }
+                } else {
+                    // For other frequencies, use the existing logic
+                    $epochNow = $now->getTimestamp();
+                    $epochCreatedPlusTimeout = strtotime(
+                        "+{$contest->lockoutLength} {$contest->lockoutFrequency}",
+                        strtotime($sessionContestVoteTimestamp)
+                    );
+
+                    if ($epochNow < $epochCreatedPlusTimeout) {
+                        $category = \craft\elements\Category::find()
+                            ->id($vote->categoryId)
+                            ->one();
+
+                        return [
+                            "success" => false,
+                            "message" => "You can only vote once every {$contest->lockoutLength} {$contest->lockoutFrequency} for category '{$category->title}'. Please try again soon.",
+                        ];
+                    }
                 }
             }
         }
@@ -168,12 +207,13 @@ class CraftcmsContestVoteService extends Component
                 $this->sendVoterToActon($vote);
             }
 
-            Craft::$app
-                ->getSession()
-                ->set(
-                    "craft-cms-contests:voteSessionProtectionTimestamp:{$vote->categoryId}",
-                    $vote->dateCreated,
-                );
+            // Save the session timestamp for session protection
+            if ($contest->sessionProtect) {
+                $sessionKey = "craft-cms-contests:voteSessionProtectionTimestamp:{$vote->categoryId}";
+                $timestamp = date("Y-m-d H:i:s");
+                Craft::info("Setting session protection timestamp for category {$vote->categoryId}: {$timestamp}", 'craft-cms-contests');
+                Craft::$app->getSession()->set($sessionKey, $timestamp);
+            }
 
             return [
                 "success" => true,
@@ -314,7 +354,7 @@ class CraftcmsContestVoteService extends Component
                 curl_close($curl);
                 if ($err) {
                     throw new \Exception($error_msg);
-                } 
+                }
 
                 $response = json_decode($response);
 
@@ -331,14 +371,31 @@ class CraftcmsContestVoteService extends Component
         $categoryId,
         $contest,
     ): ActiveRecord|array|null {
-        $dateRangeCriteria = $this->dateRangeCriteria($contest);
-        $attribs = [$field => $value, "categoryId" => $categoryId];
+        Craft::info("Validating {$field} for category {$categoryId} with value: {$value}", 'craft-cms-contests');
 
-        $rows = CraftcmsContestVoteRecord::find()
+        $dateRangeCriteria = $this->dateRangeCriteria($contest);
+        Craft::info("Date range criteria: " . json_encode($dateRangeCriteria), 'craft-cms-contests');
+
+        $query = CraftcmsContestVoteRecord::find()
             ->andWhere(["=", $field, $value])
             ->andWhere(["=", "categoryId", $categoryId])
-            ->andWhere($dateRangeCriteria)
-            ->one();
+            ->andWhere($dateRangeCriteria);
+
+        $sql = $query->createCommand()->rawSql;
+        Craft::info("SQL Query: " . $sql, 'craft-cms-contests');
+
+        $rows = $query->one();
+
+        if ($rows) {
+            Craft::info("Found existing vote: " . json_encode([
+                'id' => $rows->id,
+                'dateCreated' => $rows->dateCreated,
+                'email' => $rows->email,
+                'ip' => $rows->ip
+            ]), 'craft-cms-contests');
+        } else {
+            Craft::info("No existing vote found for {$field} = {$value} in the specified time period", 'craft-cms-contests');
+        }
 
         return $rows;
     }
@@ -347,16 +404,97 @@ class CraftcmsContestVoteService extends Component
     private function dateRangeCriteria($contest): array
     {
         $lockoutLength = $contest->lockoutLength;
-        $lockoutFrequency = $contest->lockoutFrequency;
+        $lockoutFrequency = strtolower($contest->lockoutFrequency);
+        $localTz = new \DateTimeZone('America/New_York');
+        $utcTz = new \DateTimeZone('UTC');
 
-        $lockoutFrequency =
-            $lockoutLength > 1 ? $lockoutFrequency . "s" : $lockoutFrequency;
+        // Handle daily frequency specially - resets at configured time
+        if ($lockoutFrequency === 'daily') {
+            // Get the configured reset time (defaults to '00:00')
+            $resetTime = trim(getenv('CRAFT_DAILY_RESET_TIME') ?: '00:00', "'\"");
+            
+            // Get current datetime in the local timezone
+            $now = new \DateTime('now', $localTz);
+            
+            // Create reset time for today in local timezone
+            $resetTimeToday = new \DateTime($now->format('Y-m-d') . ' ' . $resetTime, $localTz);
+            
+            // If current time is before reset time, use yesterday's reset time as the start of the period
+            if ($now < $resetTimeToday) {
+                $startOfPeriod = (clone $resetTimeToday)->modify('-1 day');
+                Craft::debug('Using yesterday\'s reset time as start of period', 'craft-cms-contests');
+            } else {
+                $startOfPeriod = $resetTimeToday;
+                Craft::debug('Using today\'s reset time as start of period', 'craft-cms-contests');
+            }
+            
+            // Convert to UTC for database comparison
+            $startOfPeriodUtc = clone $startOfPeriod;
+            $startOfPeriodUtc->setTimezone($utcTz);
+            $nowUtc = clone $now;
+            $nowUtc->setTimezone($utcTz);
+            
+            if (Craft::$app->getConfig()->getGeneral()->devMode) {
+                Craft::debug(sprintf(
+                    'Daily voting window: %s to %s (UTC)',
+                    $startOfPeriodUtc->format('Y-m-d H:i:s'),
+                    $nowUtc->format('Y-m-d H:i:s')
+                ), 'craft-cms-contests');
+            }
+            
+            return [
+                'and',
+                ['>=', 'dateCreated', $startOfPeriodUtc->format('Y-m-d H:i:s')],
+                ['<=', 'dateCreated', $nowUtc->format('Y-m-d H:i:s')]
+            ];
+        }
+        
+        // Handle legacy 'day' frequency (for backwards compatibility)
+        if ($lockoutFrequency === 'day') {
+            $startOfDay = new \DateTime('today', $localTz);
+            $now = new \DateTime('now', $localTz);
+            
+            // Convert to UTC for database comparison
+            $startOfDay->setTimezone($utcTz);
+            $now->setTimezone($utcTz);
+            
+            Craft::info(sprintf(
+                'Legacy day frequency - Querying for votes between %s and %s (UTC)',
+                $startOfDay->format('Y-m-d H:i:s'),
+                $now->format('Y-m-d H:i:s')
+            ), 'craft-cms-contests');
+            
+            return [
+                'and',
+                ['>=', 'dateCreated', $startOfDay->format('Y-m-d H:i:s')],
+                ['<=', 'dateCreated', $now->format('Y-m-d H:i:s')]
+            ];
+        }
 
-        $datePrev = date(
-            "Y-m-d H:i:s",
-            strtotime("-{$lockoutLength} {$lockoutFrequency}"),
-        );
-        $dateNow = date("Y-m-d H:i:s");
-        return ["between", "dateCreated", $datePrev, $dateNow];
+        // For all other frequencies, use the existing relative time window logic
+        $lockoutFrequency = $lockoutLength > 1 ? $contest->lockoutFrequency . "s" : $contest->lockoutFrequency;
+        
+        $now = new \DateTime('now', $localTz);
+        $startDate = clone $now;
+        
+        // Calculate the start date based on frequency
+        $startDate->modify("-$lockoutLength $lockoutFrequency");
+        
+        // Convert to UTC for database comparison
+        $startDate->setTimezone($utcTz);
+        $now->setTimezone($utcTz);
+        
+        Craft::info(sprintf(
+            'Frequency: %s - Querying for votes between %s and %s (UTC)',
+            $lockoutFrequency,
+            $startDate->format('Y-m-d H:i:s'),
+            $now->format('Y-m-d H:i:s')
+        ), 'craft-cms-contests');
+        
+        return [
+            'and',
+            ['>=', 'dateCreated', $startDate->format('Y-m-d H:i:s')],
+            ['<=', 'dateCreated', $now->format('Y-m-d H:i:s')]
+        ];
     }
 }
