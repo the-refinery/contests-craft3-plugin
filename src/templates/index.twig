@@ -19,4 +19,4 @@
 {% do view.registerAssetBundle("therefinery\\craftcmscontests\\assetbundles\\craftcmscontests\\CraftcmsContestsAsset") %}
 {% do view.registerAssetBundle("therefinery\\craftcmscontests\\assetbundles\\indexcpsection\\IndexCPSectionAsset") %}
 
-{% redirect "/admin-frogtape/craft-cms-contests/contests" %}
+{% redirect ("/" ~craft.app.config.general.cpTrigger ~ "/craft-cms-contests/contests") %}

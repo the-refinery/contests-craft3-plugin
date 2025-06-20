@@ -89,7 +89,24 @@ Next, you will want to log into the CraftCMS admin control panel if you are not 
 - Give the contest a good handle (you will need this later on)
 - Choose at least one category in which to vote
 - Set a lockout length. For example, if you wanted to prevent people from voting more than once every 5 minutes for the same category, set 5 for the "Voting Lockout Length" and "minutes" from the "Voting Lockout Frequency"
+- For daily voting limits, select "daily" as the frequency. This will allow one vote per day, with the day resetting at a configurable time (defaults to midnight)
 - Optionally add a reCaptcha secret key
+
+### Daily Voting Reset Time
+
+When using the "daily" voting lockout frequency, you can configure the time of day when the voting period resets. By default, this is set to midnight (00:00) in the America/New_York timezone.
+
+To change the reset time, add this to your `.env` file:
+
+```
+CRAFT_DAILY_RESET_TIME=03:00
+```
+
+This would reset the daily voting period at 3:00 AM. The time should be in 24-hour format (HH:MM) and will be interpreted in the America/New_York timezone.
+
+### Timezone Handling
+
+All voting times are stored in the database as UTC timestamps. The daily reset time is calculated based on the America/New_York timezone, but the system will automatically handle timezone conversion when checking for existing votes.
 
 With your new contest created, the next step is to create the entries to vote on. These entries ordinary CraftCMS entries so creating those is beyond the scope of this document. Generally the best way to set them up is to create a unique section for your votable entries. The key point, however, is to ensure that your entries belong to the votable categories. When voting on an entry, you're actually voting on an entry that belongs to a category, where that same category belongs to a contest. Without that link from entry > category > contest, the votes will not be valid.
 

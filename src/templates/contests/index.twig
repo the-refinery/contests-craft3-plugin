@@ -41,11 +41,13 @@
                         {{ contest.handle }}
                     </td>
                     <td data-title="{{ "Categories"|t }}" class="categories">
-                        {% set categories = contest.categories ? craft.categories.id(contest.categories|json_decode).all() %}
-                        {% for category in categories %}
-                            {{ category.title }}
-                            {{ not loop.last ? ', ' }}
-                        {% endfor %}
+                        {% set categories = contest.categories ? craft.categories.id(contest.categories|json_decode) %}
+                        {% if categories|length %}
+                            {% for category in categories.all() %}
+                                {{ category.title }}
+                                {{ not loop.last ? ', ' }}
+                            {% endfor %}
+                        {% endif %}
                     </td>
                     <td data-title="{{ "Lockout"|t }}" class="lockout">
                         {{ contest.lockoutLength }} {{ contest.lockoutFrequency }}{{ contest.lockoutLength == 1 ? '' : 's' }}
